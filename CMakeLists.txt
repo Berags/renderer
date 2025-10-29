@@ -9,4 +9,7 @@ add_executable(renderer main.cpp
         src/SequentialRenderer.cpp
         include/SequentialRenderer.h
         src/ParallelRenderer.cpp
-        include/ParallelRenderer.h)
+        include/ParallelRenderer.h
+        include/shape/IShape.h
+        src/shape/Circle.cpp
+        include/shape/Circle.h)
