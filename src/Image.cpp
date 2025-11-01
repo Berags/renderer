@@ -60,7 +60,6 @@ bool Image::save() const {
     const uint16_t stride_in_bytes = width * channels;
 
     // Use stb_image_write library to write the PNG file
-
     return stbi_write_png(
         filename.c_str(),
         width,
