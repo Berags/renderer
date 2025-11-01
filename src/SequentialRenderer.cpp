@@ -3,3 +3,7 @@
 //
 
 #include "../include/SequentialRenderer.h"
+
+void SequentialRenderer::render() const {
+    std::cout << "SequentialRenderer: Rendering sequentially.\n";
+}
