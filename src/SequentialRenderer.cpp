@@ -17,10 +17,7 @@ void SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<
     }
 
     // Sort shapes by Z-index (ascending) to render from back to front
-    std::ranges::sort(sorted_shapes,
-                      [](const Shape::IShape *a, const Shape::IShape *b) {
-                          return a->getZ() < b->getZ();
-                      });
+    std::ranges::sort(sorted_shapes, std::ranges::less{}, &Shape::IShape::getZ);
 
     const auto width = image.getWidth();
     const auto height = image.getHeight();

@@ -9,11 +9,13 @@ int main() {
     auto renderer = Renderer();
     renderer.set_strategy(SEQUENTIAL);
 
-    Image image(1024, 1024, "output.png");
+    Image image(2048, 2048, "output.png");
     std::vector<std::unique_ptr<Shape::IShape> > shapes;
 
-    Utils::createShapes(shapes, image, 150);
+    std::cout << "Creating shapes...\n";
+    Utils::createShapes(shapes, image, 1000);
 
+    std::cout << "Rendering image...\n";
     renderer.render(image, shapes);
 
     if (image.save()) {

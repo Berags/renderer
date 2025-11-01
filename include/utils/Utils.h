@@ -8,11 +8,27 @@
 #include <random>
 #include <vector>
 
+#include "Image.h"
 #include "shape/Circle.h"
 #include "shape/IShape.h"
 #include "shape/Rectangle.h"
 
 namespace Utils {
+    /**
+     * Creates `n` random shapes (circles or rectangles) and appends them to the provided `shapes` vector.
+     *
+     * @param shapes Reference to a vector of unique pointers to IShape objects. New shapes will be added to this vector.
+     * @param image Reference to an Image object, used to determine the valid ranges for shape positions.
+     * @param n The number of shapes to create.
+     *
+     * Behavior:
+     * - For each shape, randomly chooses between a circle and a rectangle (50% chance each).
+     * - Position (x, y): Randomly chosen within the image dimensions ([0, width-1], [0, height-1]).
+     * - z: Randomly chosen in [0, 254].
+     * - Color: Each channel (R, G, B) in [0, 255], alpha in [0.0, 1.0].
+     * - Circle radius: [20, 119].
+     * - Rectangle length and width: [20, 169].
+     */
     inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, Image &image, uint16_t n) {
         // Modern C++ random number generation
         static std::random_device rd;
@@ -32,7 +48,7 @@ namespace Utils {
         std::uniform_int_distribution<uint16_t> rect_length_dist(20, 169);
         std::uniform_int_distribution<uint16_t> rect_width_dist(20, 169);
 
-        for (int i = 0; i < n; ++i) {
+        for (uint16_t i = 0; i < n; ++i) {
             // 50% chance to create a circle or rectangle
             if (type_dist(gen) == 0) {
                 shapes.push_back(Shape::Circle::Builder()
