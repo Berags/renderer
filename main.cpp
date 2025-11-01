@@ -5,9 +5,8 @@
 
 int main() {
     auto renderer = Renderer();
+    renderer.set_filename("output.png");
     renderer.set_strategy(SEQUENTIAL);
-    renderer.render();
-    renderer.set_strategy(PARALLEL);
     renderer.render();
     auto circle = Shape::Circle::Builder()
             .x(1)
