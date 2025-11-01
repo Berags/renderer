@@ -7,14 +7,11 @@
 #include <cstdint>
 
 namespace Shape {
-    typedef struct ColourRGBA {
-        // r, g, b: 0-255
-        std::uint8_t r, g, b;
-
-        // a: 0.0-1.0
+    typedef struct alignas(16) ColourRGBA {
         // in this case we use float for simplicity,
         // but the renderer will return a RGBA8
-        float a;
+        // r, g, b, a: 0.0-1.0
+        float r, g, b, a;
     } ColourRGBA;
 
     class IShape {
