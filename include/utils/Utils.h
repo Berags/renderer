@@ -29,7 +29,7 @@ namespace Utils {
      * - Circle radius: [20, 119].
      * - Rectangle length and width: [20, 169].
      */
-    inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, Image &image, uint16_t n) {
+    inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, const Image &image, const uint16_t n) {
         // Modern C++ random number generation
         static std::random_device rd;
         static std::mt19937 gen(rd());

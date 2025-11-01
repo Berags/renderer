@@ -2,21 +2,21 @@
 // Created by jacopo on 10/28/25.
 //
 
-#include "../include/Renderer.h"
+#include "../../include/renderer/Renderer.h"
 
 #include <iostream>
 #include <ostream>
 
-#include "../include/SequentialRenderer.h"
-#include "../include/ParallelRenderer.h"
+#include "../../include/renderer/SequentialRenderer.h"
+#include "../../include/renderer/SimpleParallelRenderer.h"
 
 void Renderer::set_strategy(const RenderStrategy strategy) {
     switch (strategy) {
         case SEQUENTIAL:
             _strategy = std::make_unique<SequentialRenderer>();
             break;
-        case PARALLEL:
-            _strategy = std::make_unique<ParallelRenderer>();
+        case SIMPLE_PARALLEL:
+            _strategy = std::make_unique<SimpleParallelRenderer>();
             break;
         default:
             std::cout << "Renderer: Unknown strategy type.\n";
@@ -25,7 +25,7 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
     }
 }
 
-// Alpha blending function
+// Sequential Alpha blending function
 // https://en.wikipedia.org/wiki/Alpha_compositing#Description
 ColourRGBA8 Renderer::blend(const ColourRGBA8 &old_colour, const Shape::ColourRGBA &new_colour) {
     const float alpha = new_colour.a;

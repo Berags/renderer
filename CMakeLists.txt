@@ -30,13 +30,15 @@ add_executable(
         renderer
         main.cpp
         src/Image.cpp
-        src/Renderer.cpp
-        src/SequentialRenderer.cpp
-        src/ParallelRenderer.cpp
+        src/renderer/Renderer.cpp
+        src/renderer/SequentialRenderer.cpp
+        src/renderer/SimpleParallelRenderer.cpp
         src/shape/Circle.cpp
         src/shape/Rectangle.cpp
         src/stb_impl.cpp
         include/utils/Utils.h
+        src/renderer/VectorizedRenderer.cpp
+        include/renderer/VectorizedRenderer.h
 )
 
 # --- Include Directories ---
