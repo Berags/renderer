@@ -35,7 +35,8 @@ add_executable(
         src/ParallelRenderer.cpp
         src/shape/Circle.cpp
         src/shape/Rectangle.cpp
-        src/stb_impl.cpp # Special file for STB implementation (see notes)
+        src/stb_impl.cpp
+        include/utils/Utils.h
 )
 
 # --- Include Directories ---
@@ -53,7 +54,6 @@ target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
 # Set optimization flags.
 # -O3 for high optimization
 # -march=native to enable all instructions on the host machine (AVX, etc.)
-# This is a good way to get auto-vectorization.
 target_compile_options(
         renderer
         PRIVATE
@@ -63,7 +63,6 @@ target_compile_options(
 # For MSVC (Visual Studio)
 if (MSVC)
     target_compile_options(renderer PRIVATE /O2 /arch:AVX2)
-    # MSVC uses /openmp instead of -fopenmp
 endif ()
 
 set(CMAKE_USE_RELATIVE_PATHS ON)

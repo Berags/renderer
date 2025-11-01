@@ -27,7 +27,7 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
 
 // Alpha blending function
 // https://en.wikipedia.org/wiki/Alpha_compositing#Description
-ColourRGBA8 Renderer::blend(const ColourRGBA8 old_colour, const Shape::ColourRGBA new_colour) {
+ColourRGBA8 Renderer::blend(const ColourRGBA8 &old_colour, const Shape::ColourRGBA &new_colour) {
     const float alpha = new_colour.a;
     const float inv_alpha = 1.0f - alpha;
 

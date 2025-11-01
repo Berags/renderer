@@ -40,7 +40,7 @@ public:
         _strategy->render(image, shapes);
     }
 
-    [[nodiscard]] static ColourRGBA8 blend(const ColourRGBA8 old_colour, const Shape::ColourRGBA new_colour);
+    [[nodiscard]] static ColourRGBA8 blend(const ColourRGBA8 &old_colour, const Shape::ColourRGBA &new_colour);
 
 private:
     std::unique_ptr<Strategy> _strategy;
