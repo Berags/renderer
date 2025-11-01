@@ -12,4 +12,6 @@ add_executable(renderer main.cpp
         include/ParallelRenderer.h
         include/shape/IShape.h
         src/shape/Circle.cpp
-        include/shape/Circle.h)
+        include/shape/Circle.h
+        src/shape/Rectangle.cpp
+        include/shape/Rectangle.h)
