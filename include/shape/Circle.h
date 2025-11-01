@@ -25,7 +25,7 @@ namespace Shape {
 
             Builder &colour(const ColourRGBA &colour);
 
-            [[nodiscard]] Circle build() const;
+            [[nodiscard]] std::unique_ptr<Circle> build() const;
 
         private:
             uint16_t _x{0}, _y{0};
@@ -34,9 +34,15 @@ namespace Shape {
             ColourRGBA _colour{};
         };
 
-    private:
         explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius, const ColourRGBA &colour);
 
+        [[nodiscard]] bool isInside(const float px, const float py) const override;
+
+        [[nodiscard]] uint16_t getRadius() const {
+            return _radius;
+        }
+
+    private:
         uint16_t _radius;
     };
 } // Shape

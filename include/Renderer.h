@@ -8,6 +8,9 @@
 #include <iostream>
 #include <memory>
 
+#include "Image.h"
+#include "shape/IShape.h"
+
 typedef enum RenderStrategy {
     SEQUENTIAL,
     PARALLEL
@@ -17,7 +20,7 @@ class Strategy {
 public:
     virtual ~Strategy() = default;
 
-    virtual void render() const = 0;
+    virtual void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const = 0;
 };
 
 
@@ -29,13 +32,15 @@ public:
 
     void set_strategy(RenderStrategy strategy);
 
-    void render() const {
+    void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
         if (!_strategy) {
             throw std::runtime_error("Rendering strategy is not set.");
         }
 
-        _strategy->render();
+        _strategy->render(image, shapes);
     }
+
+    [[nodiscard]] static ColourRGBA8 blend(const ColourRGBA8 &old_colour, const Shape::ColourRGBA &new_colour);
 
 private:
     std::unique_ptr<Strategy> _strategy;

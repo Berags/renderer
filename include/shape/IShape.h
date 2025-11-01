@@ -21,6 +21,24 @@ namespace Shape {
     public:
         virtual ~IShape() = default;
 
+        [[nodiscard]] uint16_t getX() const {
+            return x;
+        }
+
+        [[nodiscard]] uint16_t getY() const {
+            return y;
+        }
+
+        [[nodiscard]] uint8_t getZ() const {
+            return z;
+        }
+
+        [[nodiscard]] ColourRGBA getColour() const {
+            return colour;
+        }
+
+        [[nodiscard]] virtual bool isInside(const float px, const float py) const = 0;
+
     protected:
         // Max supported resolution 65535x65535
         // However, it will be limited to 2048x2048
