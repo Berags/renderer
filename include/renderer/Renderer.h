@@ -5,6 +5,7 @@
 #ifndef RENDERER_RENDERER_H
 #define RENDERER_RENDERER_H
 
+#include <cmath>
 #include <memory>
 
 #include "../Image.h"
@@ -56,10 +57,10 @@ public:
 
     [[nodiscard]] static ColourRGBA8 convertToRGBA8(const Shape::ColourRGBA &float_colour) {
         return {
-            static_cast<std::uint8_t>(float_colour.r * 255.0f + 0.5f),
-            static_cast<std::uint8_t>(float_colour.g * 255.0f + 0.5f),
-            static_cast<std::uint8_t>(float_colour.b * 255.0f + 0.5f),
-            static_cast<std::uint8_t>(float_colour.a * 255.0f + 0.5f)
+            static_cast<std::uint8_t>(std::lround(float_colour.r * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(float_colour.g * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(float_colour.b * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(float_colour.a * 255.0f))
         };
     }
 

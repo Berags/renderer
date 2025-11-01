@@ -25,7 +25,7 @@ namespace Utils {
      * - For each shape, randomly chooses between a circle and a rectangle (50% chance each).
      * - Position (x, y): Randomly chosen within the image dimensions ([0, width-1], [0, height-1]).
      * - z: Randomly chosen in [0, 254].
-     * - Color: Each channel (R, G, B) in [0, 255], alpha in [0.0, 1.0].
+     * - Color: Each channel (R, G, B, A) in [0.0, 1.0].
      * - Circle radius: [20, 119].
      * - Rectangle length and width: [20, 169].
      */
