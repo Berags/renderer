@@ -24,11 +24,3 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
             break;
     }
 }
-
-void Renderer::set_filename(const std::string &filename) {
-    this->_output_filename = filename;
-}
-
-void Renderer::save() const {
-    std::cout << "Renderer: Saving rendered output to " << this->_output_filename << "\n";
-}

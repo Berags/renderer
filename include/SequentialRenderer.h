@@ -9,9 +9,7 @@
 
 class SequentialRenderer : public Strategy {
 public:
-    void render() const override {
-        std::cout << "SequentialRenderer: Rendering sequentially.\n";
-    }
+    void render() const override;
 };
 
 #endif //RENDERER_SEQUENTIALRENDERER_H
