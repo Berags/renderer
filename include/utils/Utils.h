@@ -29,7 +29,8 @@ namespace Utils {
      * - Circle radius: [20, 119].
      * - Rectangle length and width: [20, 169].
      */
-    inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, const Image &image, const uint16_t n) {
+    inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, const Image &image,
+                             const uint16_t n) {
         // Modern C++ random number generation
         static std::random_device rd;
         static std::mt19937 gen(rd());
@@ -40,8 +41,7 @@ namespace Utils {
         std::uniform_int_distribution<uint16_t> x_dist(0, width - 1);
         std::uniform_int_distribution<uint16_t> y_dist(0, height - 1);
         std::uniform_int_distribution<uint8_t> z_dist(0, 254);
-        std::uniform_int_distribution<uint8_t> color_dist(0, 255);
-        std::uniform_real_distribution<float> alpha_dist(0.0f, 1.0f);
+        std::uniform_real_distribution<float> color_dist(0.0f, 1.0f);
         std::uniform_int_distribution<> type_dist(0, 1);
 
         std::uniform_int_distribution<uint16_t> circle_radius_dist(20, 119);
@@ -60,7 +60,7 @@ namespace Utils {
                         color_dist(gen),
                         color_dist(gen),
                         color_dist(gen),
-                        alpha_dist(gen)
+                        color_dist(gen)
                     })
                     .build());
             } else {
@@ -74,7 +74,7 @@ namespace Utils {
                         color_dist(gen),
                         color_dist(gen),
                         color_dist(gen),
-                        alpha_dist(gen)
+                        color_dist(gen)
                     })
                     .build());
             }

@@ -44,7 +44,8 @@ void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_
                     const float px = static_cast<float>(x) + 0.5f;
                     const float py = static_cast<float>(y) + 0.5f;
 
-                    ColourRGBA8 final_pixel_colour{0, 0, 0, 0}; // Initialize with a transparent background.
+                    // Initialize with a transparent background.
+                    Shape::ColourRGBA final_pixel_colour{0.f, 0.f, 0.f, 0.f};
 
                     // Iterate through all shapes (already sorted by Z) for the current pixel.
                     for (const auto *shape: sorted_shapes) {
@@ -53,7 +54,7 @@ void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_
                             final_pixel_colour = Renderer::blend(final_pixel_colour, shape->getColour());
                         }
                     }
-                    image.set_pixel(x, y, final_pixel_colour);
+                    image.set_pixel(x, y, Renderer::convertToRGBA8(final_pixel_colour));
                 }
             }
         }

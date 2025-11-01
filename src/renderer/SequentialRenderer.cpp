@@ -28,7 +28,7 @@ void SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<
             const float px = static_cast<float>(x) + 0.5f;
             const float py = static_cast<float>(y) + 0.5f;
 
-            ColourRGBA8 current_pixel_colour{0, 0, 0, 0}; // Start with transparent black
+            Shape::ColourRGBA current_pixel_colour{0.f, 0.f, 0.f, 0.f}; // Start with transparent black
 
             // Iterate through shapes from back to front
             for (const auto *shape: sorted_shapes) {
@@ -37,7 +37,7 @@ void SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<
                     current_pixel_colour = Renderer::blend(current_pixel_colour, shape->getColour());
                 }
             }
-            image.set_pixel(x, y, current_pixel_colour);
+            image.set_pixel(x, y, Renderer::convertToRGBA8(current_pixel_colour));
         }
     }
 }
