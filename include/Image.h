@@ -63,6 +63,14 @@ public:
      */
     [[nodiscard]] bool save() const;
 
+    [[nodiscard]] uint16_t getWidth() const {
+        return width;
+    }
+
+    [[nodiscard]] uint16_t getHeight() const {
+        return height;
+    }
+
 private:
     uint16_t width; // Image width in pixels
     uint16_t height; // Image height in pixels
