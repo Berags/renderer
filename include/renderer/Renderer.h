@@ -8,12 +8,12 @@
 #include <iostream>
 #include <memory>
 
-#include "Image.h"
-#include "shape/IShape.h"
+#include "../Image.h"
+#include "../shape/IShape.h"
 
 typedef enum RenderStrategy {
     SEQUENTIAL,
-    PARALLEL
+    SIMPLE_PARALLEL
 } RenderStrategy;
 
 class Strategy {
