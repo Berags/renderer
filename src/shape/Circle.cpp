@@ -5,29 +5,29 @@
 #include "../../include/shape/Circle.h"
 
 namespace Shape {
-    Circle::Circle(const int16_t x, const int16_t y, const int16_t z, const int16_t radius, const ColourRGBA &colour) : _radius(radius) {
+    Circle::Circle(const uint16_t x, const uint16_t y, const uint8_t z, const uint16_t radius, const ColourRGBA &colour) : _radius(radius) {
         this->x = x;
         this->y = y;
         this->z = z;
         this->colour = colour;
     }
 
-    Circle::Builder& Circle::Builder::x(const int16_t x) {
+    Circle::Builder& Circle::Builder::x(const uint16_t x) {
         _x = x;
         return *this;
     }
 
-    Circle::Builder& Circle::Builder::y(const int16_t y) {
+    Circle::Builder& Circle::Builder::y(const uint16_t y) {
         _y = y;
         return *this;
     }
 
-    Circle::Builder& Circle::Builder::z(const int16_t z) {
+    Circle::Builder& Circle::Builder::z(const uint8_t z) {
         _z = z;
         return *this;
     }
 
-    Circle::Builder& Circle::Builder::radius(const int16_t radius) {
+    Circle::Builder& Circle::Builder::radius(const uint16_t radius) {
         _radius = radius;
         return *this;
     }

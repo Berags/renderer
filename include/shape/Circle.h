@@ -15,22 +15,28 @@ namespace Shape {
         public:
             Builder() = default;
 
-            Builder &x(int16_t x);
-            Builder &y(int16_t y);
-            Builder &z(int16_t z);
-            Builder &radius(int16_t radius);
+            Builder &x(uint16_t x);
+
+            Builder &y(uint16_t y);
+
+            Builder &z(uint8_t z);
+
+            Builder &radius(uint16_t radius);
+
             Builder &colour(const ColourRGBA &colour);
 
             [[nodiscard]] Circle build() const;
 
         private:
-            int16_t _x{0}, _y{0}, _z{0};
-            int16_t _radius{0};
+            uint16_t _x{0}, _y{0};
+            uint8_t _z{0};
+            uint16_t _radius{0};
             ColourRGBA _colour{};
         };
 
     private:
-        explicit Circle(int16_t x, int16_t y, int16_t z, int16_t radius, const ColourRGBA &colour);
+        explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius, const ColourRGBA &colour);
+
         int16_t _radius;
     };
 } // Shape
