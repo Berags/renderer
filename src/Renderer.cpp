@@ -13,14 +13,22 @@
 void Renderer::set_strategy(const RenderStrategy strategy) {
     switch (strategy) {
         case SEQUENTIAL:
-            strategy_ = std::make_unique<SequentialRenderer>();
+            _strategy = std::make_unique<SequentialRenderer>();
             break;
         case PARALLEL:
-            strategy_ =  std::make_unique<ParallelRenderer>();
+            _strategy = std::make_unique<ParallelRenderer>();
             break;
         default:
             std::cout << "Renderer: Unknown strategy type.\n";
-            strategy_ = nullptr;
+            _strategy = nullptr;
             break;
     }
+}
+
+void Renderer::set_filename(const std::string &filename) {
+    this->_output_filename = filename;
+}
+
+void Renderer::save() const {
+    std::cout << "Renderer: Saving rendered output to " << this->_output_filename << "\n";
 }
