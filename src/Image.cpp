@@ -24,6 +24,10 @@ Image::Image(const uint16_t w, const uint16_t h, std::string filename) : width(w
         throw std::runtime_error("Invalid Image dimensions.");
     }
 
+    if (w > 10000 || h > 10000) {
+        throw std::runtime_error("Image dimensions too large.");
+    }
+
     // Allocate pixel buffer as a 1D array (flattened 2D array) and initialize to transparent black (0,0,0,0)
     // This is more cache-friendly than a 2D vector and simplifies memory management
     pixel_buffer.resize(static_cast<size_t>(width) * height, {0, 0, 0, 0});
