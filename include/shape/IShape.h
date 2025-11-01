@@ -34,7 +34,7 @@ namespace Shape {
             return colour;
         }
 
-        [[nodiscard]] virtual bool isInside(float px, float py) const = 0;
+        [[nodiscard]] virtual bool isInside(const float px, const float py) const = 0;
 
     protected:
         // Max supported resolution 65535x65535

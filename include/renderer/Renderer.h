@@ -5,9 +5,7 @@
 #ifndef RENDERER_RENDERER_H
 #define RENDERER_RENDERER_H
 
-#include <iostream>
 #include <memory>
-#include <mmintrin.h>
 
 #include "../Image.h"
 #include "../shape/IShape.h"

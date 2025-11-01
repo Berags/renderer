@@ -5,9 +5,7 @@
 #include "../../include/renderer/Renderer.h"
 
 #include <iostream>
-#include <mmintrin.h>
 #include <ostream>
-#include <xmmintrin.h>
 
 #include "../../include/renderer/SequentialRenderer.h"
 #include "../../include/renderer/SimpleParallelRenderer.h"
