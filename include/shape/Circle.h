@@ -37,7 +37,7 @@ namespace Shape {
     private:
         explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius, const ColourRGBA &colour);
 
-        int16_t _radius;
+        uint16_t _radius;
     };
 } // Shape
 

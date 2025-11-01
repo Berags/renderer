@@ -33,13 +33,11 @@ public:
 
     void render() const {
         if (!_strategy) {
-            std::cout << "Context: Strategy isn't set, cannot render.\n";
-            return;
+            throw std::runtime_error("Rendering strategy is not set.");
         }
 
         if (_output_filename.empty()) {
-            std::cout << "Context: Output filename isn't set, saving to default render.o.\n";
-            const_cast<Renderer *>(this)->set_filename("render.o");
+            throw std::runtime_error("Output filename is required.");
         }
 
         _strategy->render();

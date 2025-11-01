@@ -11,9 +11,6 @@
 #include "../include/ParallelRenderer.h"
 
 void Renderer::set_strategy(const RenderStrategy strategy) {
-    if (_strategy) {
-        _strategy.reset();
-    }
     switch (strategy) {
         case SEQUENTIAL:
             _strategy = std::make_unique<SequentialRenderer>();
@@ -28,7 +25,7 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
     }
 }
 
-void Renderer::set_filename(const std::string& filename) {
+void Renderer::set_filename(const std::string &filename) {
     this->_output_filename = filename;
 }
 
