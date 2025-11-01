@@ -30,22 +30,6 @@ Image::Image(const uint16_t w, const uint16_t h, std::string filename) : width(w
 }
 
 /**
- * Set the color of a pixel at the specified coordinates.
- *
- * @param x X-coordinate (column) of the pixel
- * @param y Y-coordinate (row) of the pixel
- * @param colour RGBA color value to set
- *
- */
-void Image::set_pixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
-    if (x >= width || y >= height) {
-        throw std::runtime_error("set_pixel: Pixel coordinates out of bounds.");
-    }
-    // Convert 2D coordinates (x, y) to 1D array index using row-major order
-    pixel_buffer[static_cast<size_t>(y) * width + x] = colour;
-}
-
-/**
  * Save the image to disk as a PNG file.
  *
  * @return true if the image was saved successfully, false otherwise
@@ -54,10 +38,7 @@ bool Image::save() const {
     constexpr uint8_t channels = 4; // RGBA (4 channels: Red, Green, Blue, Alpha)
 
     // Cast pixel buffer to void* for stb_image_write compatibility
-    // The const_cast is safe here because stbi_write_png doesn't modify the data
-    const auto data = static_cast<void *>(const_cast<unsigned char *>(
-        reinterpret_cast<const unsigned char *>(pixel_buffer.data())
-    ));
+    const void *data = pixel_buffer.data();
 
     // Stride is the number of bytes per row, needed for proper PNG encoding
     const uint16_t stride_in_bytes = width * channels;

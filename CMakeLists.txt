@@ -8,7 +8,7 @@ project(
         DESCRIPTION "Parallel Renderer for Shapes"
         LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -61,10 +61,10 @@ target_compile_options(
         -march=native)
 
 # For MSVC (Visual Studio)
-if(MSVC)
+if (MSVC)
     target_compile_options(renderer PRIVATE /O2 /arch:AVX2)
     # MSVC uses /openmp instead of -fopenmp
-endif()
+endif ()
 
 set(CMAKE_USE_RELATIVE_PATHS ON)
 

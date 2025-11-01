@@ -13,10 +13,10 @@
  * Used for rendering semi-transparent shapes with alpha blending.
  */
 typedef struct ColourRGBA8 {
-    uint8_t r;  // Red channel (0-255)
-    uint8_t g;  // Green channel (0-255)
-    uint8_t b;  // Blue channel (0-255)
-    uint8_t a;  // Alpha/transparency channel (0=transparent, 255=opaque)
+    uint8_t r; // Red channel (0-255)
+    uint8_t g; // Green channel (0-255)
+    uint8_t b; // Blue channel (0-255)
+    uint8_t a; // Alpha/transparency channel (0=transparent, 255=opaque)
 } ColourRGBA8;
 
 /**
@@ -44,8 +44,16 @@ public:
      * @param x X coordinate (0 to width-1)
      * @param y Y coordinate (0 to height-1)
      * @param colour RGBA color value to set
+     *
+     * @throws std::out_of_range if (x, y) is outside the image bounds
      */
-    inline void set_pixel(uint16_t x, uint16_t y, ColourRGBA8 colour);
+    inline void set_pixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
+        if (x >= width || y >= height) {
+            throw std::runtime_error("set_pixel: Pixel coordinates out of bounds.");
+        }
+        // Convert 2D coordinates (x, y) to 1D array index using row-major order
+        pixel_buffer[static_cast<size_t>(y) * width + x] = colour;
+    }
 
     /**
      * Save the image buffer to a PNG file.
@@ -56,13 +64,13 @@ public:
     [[nodiscard]] bool save() const;
 
 private:
-    uint16_t width;   // Image width in pixels
-    uint16_t height;  // Image height in pixels
+    uint16_t width; // Image width in pixels
+    uint16_t height; // Image height in pixels
 
     // Flattened 1D buffer: index = y * width + x
     std::vector<ColourRGBA8> pixel_buffer;
 
-    std::string filename;  // Output PNG filename
+    std::string filename; // Output PNG filename
 };
 
 
