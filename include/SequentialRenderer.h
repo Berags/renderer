@@ -8,6 +8,7 @@
 #include "Renderer.h"
 
 class SequentialRenderer : public Strategy {
+public:
     void render() const override;
 };
 

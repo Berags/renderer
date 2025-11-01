@@ -20,7 +20,7 @@
 Image::Image(const uint16_t w, const uint16_t h, std::string filename) : width(w), height(h),
                                                                          filename(std::move(filename)) {
     // Validate dimensions to prevent creating invalid or zero-sized images
-    if (w <= 0 || h <= 0) {
+    if (w == 0 || h == 0) {
         throw std::runtime_error("Invalid Image dimensions.");
     }
 
@@ -38,6 +38,9 @@ Image::Image(const uint16_t w, const uint16_t h, std::string filename) : width(w
  *
  */
 void Image::set_pixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
+    if (x >= width || y >= height) {
+        throw std::runtime_error("set_pixel: Pixel coordinates out of bounds.");
+    }
     // Convert 2D coordinates (x, y) to 1D array index using row-major order
     pixel_buffer[static_cast<size_t>(y) * width + x] = colour;
 }
