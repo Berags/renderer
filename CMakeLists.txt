@@ -8,18 +8,14 @@ project(
         DESCRIPTION "Parallel Renderer for Shapes"
         LANGUAGES CXX)
 
-# Set the C++ standard (C++26 is experimental, C++20 or C++17 is safer)
-# I'll use 20 as 26 is not widely supported.
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # --- OpenMP Configuration ---
-# Find and configure OpenMP
 find_package(OpenMP REQUIRED)
 
 # --- Dependency: stb_image_write ---
-# Use FetchContent to download the STB library from GitHub
 include(FetchContent)
 FetchContent_Declare(
         stb
@@ -30,7 +26,6 @@ FetchContent_MakeAvailable(stb)
 # This makes the headers available in ${stb_SOURCE_DIR}
 
 # --- Main Executable Target ---
-# Define the executable
 add_executable(
         renderer
         main.cpp
@@ -44,8 +39,6 @@ add_executable(
 )
 
 # --- Include Directories ---
-# Add our 'include' directory
-# Add the downloaded STB headers directory
 target_include_directories(
         renderer
         PRIVATE
@@ -54,7 +47,6 @@ target_include_directories(
 )
 
 # --- Link Libraries ---
-# Link OpenMP to our target
 target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
 
 # --- Compiler Flags ---
@@ -74,11 +66,8 @@ if(MSVC)
     # MSVC uses /openmp instead of -fopenmp
 endif()
 
-# --- Best Practices ---
-# Enable relative paths for cleaner builds
 set(CMAKE_USE_RELATIVE_PATHS ON)
 
-# Install rule (optional, but good practice)
 install(
         TARGETS renderer
         DESTINATION bin)
