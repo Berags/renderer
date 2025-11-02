@@ -39,6 +39,8 @@ add_executable(
         include/utils/Utils.h
         src/renderer/VectorizedRenderer.cpp
         include/renderer/VectorizedRenderer.h
+        src/shape/Triangle.cpp
+        include/shape/Triangle.h
 )
 
 # --- Include Directories ---

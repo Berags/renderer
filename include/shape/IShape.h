@@ -14,6 +14,10 @@ namespace Shape {
         float r, g, b, a;
     } ColourRGBA;
 
+    struct Point2D {
+        float x, y;
+    };
+
     class IShape {
     public:
         virtual ~IShape() = default;
