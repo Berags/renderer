@@ -12,22 +12,24 @@
 #include "shape/Circle.h"
 #include "shape/IShape.h"
 #include "shape/Rectangle.h"
+#include "shape/Triangle.h"
 
 namespace Utils {
     /**
-     * Creates `n` random shapes (circles or rectangles) and appends them to the provided `shapes` vector.
+     * Creates `n` random shapes (circles, rectangles, or triangles) and appends them to the provided `shapes` vector.
      *
      * @param shapes Reference to a vector of unique pointers to IShape objects. New shapes will be added to this vector.
      * @param image Reference to an Image object, used to determine the valid ranges for shape positions.
      * @param n The number of shapes to create.
      *
      * Behavior:
-     * - For each shape, randomly chooses between a circle and a rectangle (50% chance each).
+     * - For each shape, randomly chooses between a circle, a rectangle, and a triangle.
      * - Position (x, y): Randomly chosen within the image dimensions ([0, width-1], [0, height-1]).
      * - z: Randomly chosen in [0, 254].
      * - Color: Each channel (R, G, B, A) in [0.0, 1.0].
      * - Circle radius: [20, 119].
      * - Rectangle length and width: [20, 169].
+     * - Triangle vertices: Randomly chosen within the image dimensions.
      */
     inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, const Image &image,
                              const uint16_t n) {
@@ -42,15 +44,16 @@ namespace Utils {
         std::uniform_int_distribution<uint16_t> y_dist(0, height - 1);
         std::uniform_int_distribution<uint8_t> z_dist(0, 254);
         std::uniform_real_distribution<float> color_dist(0.0f, 1.0f);
-        std::uniform_int_distribution<> type_dist(0, 1);
+        std::uniform_int_distribution<> type_dist(0, 2);
 
         std::uniform_int_distribution<uint16_t> circle_radius_dist(20, 119);
         std::uniform_int_distribution<uint16_t> rect_length_dist(20, 169);
         std::uniform_int_distribution<uint16_t> rect_width_dist(20, 169);
 
         for (uint16_t i = 0; i < n; ++i) {
-            // 50% chance to create a circle or rectangle
-            if (type_dist(gen) == 0) {
+            // uniform distribution to choose shape type
+            int shape_type = type_dist(gen);
+            if (shape_type == 0) {
                 shapes.push_back(Shape::Circle::Builder()
                     .x(x_dist(gen))
                     .y(y_dist(gen))
@@ -63,7 +66,7 @@ namespace Utils {
                         color_dist(gen)
                     })
                     .build());
-            } else {
+            } else if (shape_type == 1) {
                 shapes.push_back(Shape::Rectangle::Builder()
                     .x(x_dist(gen))
                     .y(y_dist(gen))
@@ -77,8 +80,26 @@ namespace Utils {
                         color_dist(gen)
                     })
                     .build());
+            } else {
+                shapes.push_back(Shape::Triangle::Builder()
+                    .p1({static_cast<float>(x_dist(gen)), static_cast<float>(y_dist(gen))})
+                    .p2({static_cast<float>(x_dist(gen)), static_cast<float>(y_dist(gen))})
+                    .p3({static_cast<float>(x_dist(gen)), static_cast<float>(y_dist(gen))})
+                    .z(z_dist(gen))
+                    .colour({
+                        color_dist(gen),
+                        color_dist(gen),
+                        color_dist(gen),
+                        color_dist(gen)
+                    })
+                    .build());
             }
         }
+    }
+
+    inline bool equal(const float a, const float b) {
+        return std::nextafter(a, std::numeric_limits<float>::lowest()) <= b
+               && std::nextafter(a, std::numeric_limits<float>::max()) >= b;
     }
 }
 
