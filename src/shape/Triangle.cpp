@@ -4,6 +4,8 @@
 
 #include "../../include/shape/Triangle.h"
 
+#include "utils/Utils.h"
+
 namespace Shape {
     Triangle::Triangle(const Point2D &p1, const Point2D &p2, const Point2D &p3, const uint8_t z,
                        const ColourRGBA &colour) : _p1(p1), _p2(p2), _p3(p3) {
@@ -23,6 +25,9 @@ namespace Shape {
         const float y2 = _p3.y;
 
         const float denom = (y1 - y2) * (x0 - x2) + (x2 - x1) * (y0 - y2);
+        if (Utils::equal(denom, 0.0f)) {
+            return false; // Degenerate triangle
+        }
         const float a = ((y1 - y2) * (px - x2) + (x2 - x1) * (py - y2)) / denom;
         const float b = ((y2 - y0) * (px - x2) + (x0 - x2) * (py - y2)) / denom;
         const float c = 1.0f - a - b;

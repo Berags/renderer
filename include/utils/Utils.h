@@ -96,6 +96,11 @@ namespace Utils {
             }
         }
     }
+
+    inline bool equal(const float a, const float b) {
+        return std::nextafter(a, std::numeric_limits<float>::lowest()) <= b
+               && std::nextafter(a, std::numeric_limits<float>::max()) >= b;
+    }
 }
 
 #endif //RENDERER_UTILS_H
