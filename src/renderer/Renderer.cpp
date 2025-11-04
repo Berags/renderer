@@ -9,6 +9,7 @@
 
 #include "../../include/renderer/SequentialRenderer.h"
 #include "../../include/renderer/SimpleParallelRenderer.h"
+#include "renderer/OptimizedParallelRenderer.h"
 
 void Renderer::set_strategy(const RenderStrategy strategy) {
     switch (strategy) {
@@ -17,6 +18,9 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
             break;
         case SIMPLE_PARALLEL:
             _strategy = std::make_unique<SimpleParallelRenderer>();
+            break;
+        case VECTORIZED_PARALLEL:
+            _strategy = std::make_unique<OptimizedParallelRenderer>();
             break;
         default:
             std::cout << "Renderer: Unknown strategy type.\n";

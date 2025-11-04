@@ -37,8 +37,8 @@ add_executable(
         src/shape/Rectangle.cpp
         src/stb_impl.cpp
         include/utils/Utils.h
-        src/renderer/VectorizedRenderer.cpp
-        include/renderer/VectorizedRenderer.h
+        src/renderer/OptimizedParallelRenderer.cpp
+        include/renderer/OptimizedParallelRenderer.h
 )
 
 # --- Include Directories ---
