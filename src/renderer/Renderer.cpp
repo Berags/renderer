@@ -2,13 +2,13 @@
 // Created by jacopo on 10/28/25.
 //
 
-#include "../../include/renderer/Renderer.h"
+#include "renderer/Renderer.h"
 
 #include <iostream>
 #include <ostream>
 
-#include "../../include/renderer/SequentialRenderer.h"
-#include "../../include/renderer/SimpleParallelRenderer.h"
+#include "renderer/SequentialRenderer.h"
+#include "renderer/SimpleParallelRenderer.h"
 #include "renderer/OptimizedParallelRenderer.h"
 
 void Renderer::set_strategy(const RenderStrategy strategy) {
@@ -19,7 +19,7 @@ void Renderer::set_strategy(const RenderStrategy strategy) {
         case SIMPLE_PARALLEL:
             _strategy = std::make_unique<SimpleParallelRenderer>();
             break;
-        case VECTORIZED_PARALLEL:
+        case OPTIMIZED_PARALLEL:
             _strategy = std::make_unique<OptimizedParallelRenderer>();
             break;
         default:

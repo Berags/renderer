@@ -14,7 +14,7 @@
 typedef enum RenderStrategy {
     SEQUENTIAL,
     SIMPLE_PARALLEL,
-    VECTORIZED_PARALLEL,
+    OPTIMIZED_PARALLEL,
 } RenderStrategy;
 
 class Strategy {

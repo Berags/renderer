@@ -9,7 +9,7 @@
 
 int main() {
     auto renderer = Renderer();
-    renderer.set_strategy(SIMPLE_PARALLEL);
+    renderer.set_strategy(OPTIMIZED_PARALLEL);
 
     Image image(2048, 2048, "output.png");
     std::vector<std::unique_ptr<Shape::IShape> > shapes;

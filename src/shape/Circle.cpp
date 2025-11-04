@@ -45,6 +45,6 @@ namespace Shape {
     bool Circle::isInside(const float px, const float py) const {
         const float dx = static_cast<float>(this->getX()) - px;
         const float dy = static_cast<float>(this->getY()) - py;
-        return (dx * dx + dy * dy) <= static_cast<float>(this->getRadius() * this->getRadius());
+        return (dx * dx + dy * dy) <= static_cast<float>(this->getRadius()) * static_cast<float>(this->getRadius());
     }
 } // Shape
