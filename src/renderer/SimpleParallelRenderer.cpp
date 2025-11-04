@@ -45,16 +45,16 @@ void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_
                     const float py = static_cast<float>(y) + 0.5f;
 
                     // Initialize with a transparent background.
-                    Shape::ColourRGBA final_pixel_colour{0.f, 0.f, 0.f, 0.f};
+                    Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
 
                     // Iterate through all shapes (already sorted by Z) for the current pixel.
                     for (const auto *shape: sorted_shapes) {
                         if (shape->isInside(px, py)) {
                             // If the pixel is inside the shape, blend its color.
-                            final_pixel_colour = Renderer::blend(final_pixel_colour, shape->getColour());
+                            processedPixelColour = Renderer::blend(processedPixelColour, shape->getColour());
                         }
                     }
-                    image.set_pixel(x, y, Renderer::convertToRGBA8(final_pixel_colour));
+                    image.set_pixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
                 }
             }
         }

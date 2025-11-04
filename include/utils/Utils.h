@@ -31,9 +31,8 @@ namespace Utils {
      */
     inline void createShapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes, const Image &image,
                              const uint16_t n) {
-        // Modern C++ random number generation
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
+        // Using a fixed seed for reproducibility
+        static std::mt19937 gen(232710);
 
         const uint16_t width = image.getWidth();
         const uint16_t height = image.getHeight();
