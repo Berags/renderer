@@ -9,7 +9,7 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-void OptimizedParallelRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     // Convert polymorphic shapes to flat RenderItem structs for better cache locality and vectorization
     std::vector<RenderItem> render_list;
     render_list.reserve(shapes.size());
@@ -50,7 +50,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
     const uint16_t num_tiles_y = (height + TILE_SIZE - 1) / TILE_SIZE;
 
     // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (uint16_t ty = 0; ty < num_tiles_y; ++ty) {
         for (uint16_t tx = 0; tx < num_tiles_x; ++tx) {
             const uint16_t y_start = ty * TILE_SIZE;
@@ -63,7 +63,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
                 const float py = static_cast<float>(y) + 0.5f;
 
                 // SIMD vectorization for pixel-level parallelism within a row
-#pragma omp simd
+                #pragma omp simd
                 for (uint16_t x = x_start; x < x_end; ++x) {
                     const float px = static_cast<float>(x) + 0.5f;
 
@@ -90,7 +90,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
                             processedPixelColour = Renderer::blend(processedPixelColour, item.colour);
                         }
                     }
-                    image.set_pixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
+                    image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
                 }
             }
         }

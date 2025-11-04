@@ -9,7 +9,7 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-void SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+void Renderer::SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     std::vector<const Shape::IShape *> sorted_shapes;
     sorted_shapes.reserve(shapes.size());
     for (const auto &ptr: shapes) {
@@ -37,7 +37,7 @@ void SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<
                     processedPixelColour = Renderer::blend(processedPixelColour, shape->getColour());
                 }
             }
-            image.set_pixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
+            image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
         }
     }
 }

@@ -7,10 +7,10 @@
 namespace Shape {
     Circle::Circle(const uint16_t x, const uint16_t y, const uint8_t z, const uint16_t radius,
                    const ColourRGBA &colour) : _radius(radius) {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        this->colour = colour;
+        this->_x = x;
+        this->_y = y;
+        this->_z = z;
+        this->_colour = colour;
     }
 
     Circle::Builder &Circle::Builder::x(const uint16_t x) {
