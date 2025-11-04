@@ -49,7 +49,7 @@ public:
      */
     void setPixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
         if (x >= _width || y >= _height) {
-            throw std::runtime_error("set_pixel: Pixel coordinates out of bounds.");
+            throw std::runtime_error("setPixel: Pixel coordinates out of bounds.");
         }
         // Convert 2D coordinates (x, y) to 1D array index using row-major order
         _pixelBuffer[static_cast<size_t>(y) * _width + x] = colour;
