@@ -9,7 +9,7 @@
 #include <vector>
 
 /**
- * RGBA color representation using 8-bit per channel (0-255).
+ * RGBA color representation using 8-bit per channel (0-255), i.e. RGBA8.
  * Used for rendering semi-transparent shapes with alpha blending.
  */
 typedef struct ColourRGBA8 {
@@ -47,12 +47,12 @@ public:
      *
      * @throws std::out_of_range if (x, y) is outside the image bounds
      */
-    inline void set_pixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
-        if (x >= width || y >= height) {
-            throw std::runtime_error("set_pixel: Pixel coordinates out of bounds.");
+    void setPixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
+        if (x >= _width || y >= _height) {
+            throw std::runtime_error("setPixel: Pixel coordinates out of bounds.");
         }
         // Convert 2D coordinates (x, y) to 1D array index using row-major order
-        pixel_buffer[static_cast<size_t>(y) * width + x] = colour;
+        _pixelBuffer[static_cast<size_t>(y) * _width + x] = colour;
     }
 
     /**
@@ -64,21 +64,23 @@ public:
     [[nodiscard]] bool save() const;
 
     [[nodiscard]] uint16_t getWidth() const {
-        return width;
+        return _width;
     }
 
     [[nodiscard]] uint16_t getHeight() const {
-        return height;
+        return _height;
     }
 
 private:
-    uint16_t width; // Image width in pixels
-    uint16_t height; // Image height in pixels
+    constexpr static uint16_t MAX_WIDTH = 2048;
+    constexpr static uint16_t MAX_HEIGHT = 2048;
+    uint16_t _width; // Image width in pixels
+    uint16_t _height; // Image height in pixels
 
     // Flattened 1D buffer: index = y * width + x
-    std::vector<ColourRGBA8> pixel_buffer;
+    std::vector<ColourRGBA8> _pixelBuffer;
 
-    std::string filename; // Output PNG filename
+    std::string _filename; // Output PNG filename
 };
 
 

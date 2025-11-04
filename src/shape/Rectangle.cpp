@@ -7,10 +7,10 @@
 namespace Shape {
     Rectangle::Rectangle(const uint16_t x, const uint16_t y, const uint8_t z, const uint16_t length,
                          const uint16_t width, const ColourRGBA &colour) : _length(length), _width(width) {
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        this->colour = colour;
+        this->_x = x;
+        this->_y = y;
+        this->_z = z;
+        this->_colour = colour;
     }
 
     bool Rectangle::isInside(const float px, const float py) const {

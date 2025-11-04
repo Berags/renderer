@@ -11,7 +11,7 @@
 #include "renderer/SimpleParallelRenderer.h"
 #include "renderer/OptimizedParallelRenderer.h"
 
-void Renderer::set_strategy(const RenderStrategy strategy) {
+void Renderer::Renderer::setStrategy(const RenderStrategy strategy) {
     switch (strategy) {
         case SEQUENTIAL:
             _strategy = std::make_unique<SequentialRenderer>();

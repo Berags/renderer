@@ -6,7 +6,8 @@
 
 #include <algorithm>
 
-void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+void Renderer::SimpleParallelRenderer::render(Image &image,
+                                              const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     // Create a vector of raw pointers to shapes to allow sorting without moving ownership.
     std::vector<const Shape::IShape *> sorted_shapes;
     sorted_shapes.reserve(shapes.size());
@@ -28,7 +29,7 @@ void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_
 
     // Parallelize the rendering process over the tiles using OpenMP.
     // The `collapse(2)` clause flattens the nested loops over tiles into a single parallel loop.
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (uint16_t ty = 0; ty < num_tiles_y; ++ty) {
         for (uint16_t tx = 0; tx < num_tiles_x; ++tx) {
             // Determine the pixel boundaries for the current tile.
@@ -54,7 +55,7 @@ void SimpleParallelRenderer::render(Image &image, const std::vector<std::unique_
                             processedPixelColour = Renderer::blend(processedPixelColour, shape->getColour());
                         }
                     }
-                    image.set_pixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
+                    image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
                 }
             }
         }
