@@ -2,7 +2,7 @@
 // Created by jacopo on 11/1/25.
 //
 
-#include "../../include/renderer/OptimizedParallelRenderer.h"
+#include "renderer/OptimizedParallelRenderer.h"
 
 #include <algorithm>
 
@@ -25,7 +25,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
             item.p1 = static_cast<float>(c->getX());
             item.p2 = static_cast<float>(c->getY());
             // Store radius squared to avoid sqrt in inner loop
-            item.p3 = static_cast<float>(c->getRadius() * c->getRadius());
+            item.p3 = static_cast<float>(c->getRadius()) * static_cast<float>(c->getRadius());
         } else if (const auto *r = dynamic_cast<const Shape::Rectangle *>(s_ptr.get())) {
             item.type = RenderItem::RECTANGLE;
             const float half_len = static_cast<float>(r->getLength()) / 2.0f;
@@ -50,7 +50,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
     const uint16_t num_tiles_y = (height + TILE_SIZE - 1) / TILE_SIZE;
 
     // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
     for (uint16_t ty = 0; ty < num_tiles_y; ++ty) {
         for (uint16_t tx = 0; tx < num_tiles_x; ++tx) {
             const uint16_t y_start = ty * TILE_SIZE;
@@ -63,7 +63,7 @@ void OptimizedParallelRenderer::render(Image &image, const std::vector<std::uniq
                 const float py = static_cast<float>(y) + 0.5f;
 
                 // SIMD vectorization for pixel-level parallelism within a row
-                #pragma omp simd
+#pragma omp simd
                 for (uint16_t x = x_start; x < x_end; ++x) {
                     const float px = static_cast<float>(x) + 0.5f;
 
