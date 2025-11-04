@@ -2,8 +2,8 @@
 // Created by jacopo on 11/1/25.
 //
 
-#ifndef RENDERER_VECTORIZEDRENDERER_H
-#define RENDERER_VECTORIZEDRENDERER_H
+#ifndef RENDERER_OPTIMIZEDPARALLELRENDERER_H
+#define RENDERER_OPTIMIZEDPARALLELRENDERER_H
 #include "Renderer.h"
 
 class OptimizedParallelRenderer : public Strategy {
@@ -29,4 +29,4 @@ private:
 };
 
 
-#endif //RENDERER_VECTORIZEDRENDERER_H
+#endif //RENDERER_OPTIMIZEDPARALLELRENDERER_H
