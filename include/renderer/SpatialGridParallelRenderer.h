@@ -2,12 +2,12 @@
 // Created by jacopo on 11/1/25.
 //
 
-#ifndef RENDERER_OPTIMIZEDPARALLELRENDERER_H
-#define RENDERER_OPTIMIZEDPARALLELRENDERER_H
+#ifndef RENDERER_SPATIALGRIDPARALLELRENDERER_H
+#define RENDERER_SPATIALGRIDPARALLELRENDERER_H
 #include "Renderer.h"
 
 namespace Renderer {
-    class OptimizedParallelRenderer : public Strategy {
+    class SpatialGridParallelRenderer : public Strategy {
     public:
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
@@ -24,13 +24,13 @@ namespace Renderer {
             float p1, p2, p3, p4; // shape-specific parameters
         };
 
-        [[nodiscard]] static bool compareZ(const RenderItem &a, const RenderItem &b) {
-            if (a.z != b.z) {
-                return a.z < b.z;
+        static bool compareRenderItemZ(const RenderItem *a, const RenderItem *b) {
+            if (a->z != b->z) {
+                return a->z < b->z;
             }
-            return &a < &b;
+            return a < b;
         }
     };
 }
 
-#endif //RENDERER_OPTIMIZEDPARALLELRENDERER_H
+#endif //RENDERER_SPATIALGRIDPARALLELRENDERER_H

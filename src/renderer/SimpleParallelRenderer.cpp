@@ -16,7 +16,7 @@ void Renderer::SimpleParallelRenderer::render(Image &image,
     }
 
     // Sort shapes by Z-index (ascending) to ensure correct alpha blending from back to front.
-    std::ranges::sort(sorted_shapes, std::ranges::less{}, &Shape::IShape::getZ);
+    std::ranges::stable_sort(sorted_shapes, std::ranges::less{}, &Shape::IShape::getZ);
 
     const auto width = image.getWidth();
     const auto height = image.getHeight();

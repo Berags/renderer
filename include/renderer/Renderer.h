@@ -16,6 +16,7 @@ namespace Renderer {
         SEQUENTIAL,
         SIMPLE_PARALLEL,
         OPTIMIZED_PARALLEL,
+        SPATIAL_GRID_PARALLEL
     } RenderStrategy;
 
     class Strategy {

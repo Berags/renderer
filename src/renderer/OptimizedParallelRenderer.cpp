@@ -39,7 +39,7 @@ void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector
     }
 
     // Sort shapes by Z-axis for correct transparency/alpha blending (back-to-front)
-    std::ranges::sort(render_list, compareRenderItemZ);
+    std::ranges::stable_sort(render_list, compareZ);
 
     const auto width = image.getWidth();
     const auto height = image.getHeight();
