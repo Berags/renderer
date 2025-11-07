@@ -15,7 +15,7 @@ int main() {
     std::vector<std::unique_ptr<Shape::IShape> > shapes;
 
     std::cout << "Creating shapes...\n";
-    Utils::createShapes(shapes, image, 15000);
+    Utils::createShapes(shapes, image, 5000);
 
     std::cout << "Rendering image...\n";
     const double startTime = omp_get_wtime();

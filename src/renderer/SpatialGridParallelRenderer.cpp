@@ -62,9 +62,9 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         // to account for the pixel center offset.
         const int32_t pixelXMin = std::max(0, static_cast<int32_t>(std::ceil(xMin - 0.5f)));
         const int32_t pixelYMin = std::max(0, static_cast<int32_t>(std::ceil(yMin - 0.5f)));
-        const int32_t pixelXMax = std::min((width - 1),
+        const int32_t pixelXMax = std::min(static_cast<int32_t>(width) - 1,
                                            static_cast<int32_t>(std::floor(xMax - 0.5f)));
-        const int32_t pixelYMax = std::min((height - 1),
+        const int32_t pixelYMax = std::min(static_cast<int32_t>(height) - 1,
                                            static_cast<int32_t>(std::floor(yMax - 0.5f)));
 
         // Continue only if the shape is actually visible
@@ -77,11 +77,8 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         const uint16_t tileYStart = pixelYMin / TILE_SIZE;
 
         // Ensure the last pixel is included in the correct tile, even at boundaries.
-        // When pixelXMax is at the edge of a tile boundary (e.g., pixelXMax = 63, TILE_SIZE = 32),
-        // the pixel is actually within tile 1 (0-indexed).
-        // If pixelXMax = 64, it should include tile 2.
-        const uint16_t tileXEnd = std::min((pixelXMax + TILE_SIZE - 1) / TILE_SIZE, (numberOfTilesX - 1));
-        const uint16_t tileYEnd = std::min((pixelYMax + TILE_SIZE - 1) / TILE_SIZE, (numberOfTilesY - 1));
+        const uint16_t tileXEnd = std::min(static_cast<uint16_t>(pixelXMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesX - 1));
+        const uint16_t tileYEnd = std::min(static_cast<uint16_t>(pixelYMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesY - 1));
 
         // Add this shape to all tiles it overlaps.
         for (uint16_t ty = tileYStart; ty <= tileYEnd; ty++) {
@@ -120,7 +117,6 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
             for (uint16_t y = pixelStartY; y < pixelEndY; y++) {
                 const float pixelCenterY = static_cast<float>(y) + 0.5f;
 
-                #pragma omp simd
                 for (uint16_t x = pixelStartX; x < pixelEndX; x++) {
                     const float pixelCenterX = static_cast<float>(x) + 0.5f;
                     Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
