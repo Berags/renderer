@@ -10,6 +10,7 @@
 #include "renderer/SequentialRenderer.h"
 #include "renderer/SimpleParallelRenderer.h"
 #include "renderer/OptimizedParallelRenderer.h"
+#include "renderer/SpatialGridParallelRenderer.h"
 
 void Renderer::Renderer::setStrategy(const RenderStrategy strategy) {
     switch (strategy) {
@@ -21,6 +22,9 @@ void Renderer::Renderer::setStrategy(const RenderStrategy strategy) {
             break;
         case OPTIMIZED_PARALLEL:
             _strategy = std::make_unique<OptimizedParallelRenderer>();
+            break;
+        case SPATIAL_GRID_PARALLEL:
+            _strategy = std::make_unique<SpatialGridParallelRenderer>();
             break;
         default:
             std::cout << "Renderer: Unknown strategy type.\n";

@@ -37,8 +37,11 @@ add_executable(
         src/shape/Rectangle.cpp
         src/stb_impl.cpp
         include/utils/Utils.h
+        src/renderer/SpatialGridParallelRenderer.cpp
+        include/renderer/SpatialGridParallelRenderer.h
         src/renderer/OptimizedParallelRenderer.cpp
         include/renderer/OptimizedParallelRenderer.h
+        include/shape/IShapeVisitor.h
 )
 
 # --- Include Directories ---

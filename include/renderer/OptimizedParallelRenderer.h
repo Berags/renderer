@@ -11,7 +11,7 @@ namespace Renderer {
     public:
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
-    private:
+    protected:
         struct RenderItem {
             uint8_t z;
 
@@ -20,12 +20,18 @@ namespace Renderer {
                 RECTANGLE
             } type;
 
+            // Unique identifier for stable sorting
+            size_t id;
+
             Shape::ColourRGBA colour;
             float p1, p2, p3, p4; // shape-specific parameters
         };
 
-        static bool compareRenderItemZ(const RenderItem &a, const RenderItem &b) {
-            return a.z < b.z;
+        [[nodiscard]] static bool compareZ(const RenderItem &a, const RenderItem &b) {
+            if (a.z != b.z) {
+                return a.z < b.z;
+            }
+            return a.id < b.id;
         }
     };
 }

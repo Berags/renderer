@@ -41,15 +41,15 @@ namespace Utils {
         std::uniform_int_distribution<uint16_t> yDistribution(0, height - 1);
         std::uniform_int_distribution<uint8_t> zDistribution(0, 255);
         std::uniform_real_distribution colourDistribution(0.0f, 1.0f);
-        std::uniform_int_distribution typeDistribution(0, 1);
+        std::uniform_int_distribution typeDistribution(0, 3);
 
         std::uniform_int_distribution<uint16_t> circleRadiusDistribution(20, 119);
         std::uniform_int_distribution<uint16_t> rectangleLengthDistribution(20, 169);
         std::uniform_int_distribution<uint16_t> rectangleWidthDistribution(20, 169);
 
         for (uint16_t i = 0; i < n; ++i) {
-            // 50% chance to create a circle or rectangle
-            if (typeDistribution(gen) == 0) {
+            // 75% chance to create a circle
+            if (typeDistribution(gen) != 0) {
                 shapes.push_back(Shape::Circle::Builder()
                     .x(xDistribution(gen))
                     .y(yDistribution(gen))

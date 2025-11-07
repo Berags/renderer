@@ -15,8 +15,10 @@ void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector
     render_list.reserve(shapes.size());
 
     // This adds a O(N) preprocessing step, but allows better performance in the inner loops
+    size_t i = 0;
     for (const auto &s_ptr: shapes) {
         RenderItem item{};
+        item.id = i++;
         item.z = s_ptr->getZ();
         item.colour = s_ptr->getColour();
 
@@ -39,7 +41,7 @@ void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector
     }
 
     // Sort shapes by Z-axis for correct transparency/alpha blending (back-to-front)
-    std::ranges::sort(render_list, compareRenderItemZ);
+    std::ranges::stable_sort(render_list, compareZ);
 
     const auto width = image.getWidth();
     const auto height = image.getHeight();
