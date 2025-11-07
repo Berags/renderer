@@ -25,40 +25,30 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     std::vector<std::vector<const RenderItem *> > spatialIndex(totalTiles);
 
     std::vector<omp_lock_t> tileLocks(totalTiles);
-    for (size_t i = 0; i < totalTiles; ++i) {
+    for (size_t i = 0; i < totalTiles; i++) {
         omp_init_lock(&tileLocks[i]);
     }
 
-#pragma omp parallel for
-    for (size_t i = 0; i < shapes.size(); ++i) {
+    #pragma omp parallel for
+    for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
 
         item.z = shape->getZ();
         item.colour = shape->getColour();
 
+        RenderItemVisitor visitor(item);
+        shape->accept(visitor);
+
         float xMin, yMin, xMax, yMax;
 
-        if (const auto *c = dynamic_cast<const Shape::Circle *>(shape.get())) {
-            item.type = RenderItem::CIRCLE;
-            item.p1 = static_cast<float>(c->getX()); // center_x
-            item.p2 = static_cast<float>(c->getY()); // center_y
-            const auto radius = static_cast<float>(c->getRadius());
-            item.p3 = radius * radius; // radius_sq
-
+        if (item.type == RenderItem::CIRCLE) {
+            const auto radius = std::sqrt(item.p3);
             xMin = item.p1 - radius;
             yMin = item.p2 - radius;
             xMax = item.p1 + radius;
             yMax = item.p2 + radius;
-        } else if (const auto *r = dynamic_cast<const Shape::Rectangle *>(shape.get())) {
-            item.type = RenderItem::RECTANGLE;
-            const float halfLength = static_cast<float>(r->getLength()) / 2.0f;
-            const float halfWidth = static_cast<float>(r->getWidth()) / 2.0f;
-            item.p1 = static_cast<float>(r->getX()) - halfLength; // xMin
-            item.p2 = static_cast<float>(r->getY()) - halfWidth; // yMin
-            item.p3 = static_cast<float>(r->getX()) + halfLength; // xMax
-            item.p4 = static_cast<float>(r->getY()) + halfWidth; // yMax
-
+        } else {
             xMin = item.p1;
             yMin = item.p2;
             xMax = item.p3;
@@ -85,8 +75,8 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         const uint16_t tileYEnd = std::min(pixelYMax / TILE_SIZE, (numberOfTilesY - 1));
 
         // Add this shape to all tiles it overlaps.
-        for (uint16_t ty = tileYStart; ty <= tileYEnd; ++ty) {
-            for (uint16_t tx = tileXStart; tx <= tileXEnd; ++tx) {
+        for (uint16_t ty = tileYStart; ty <= tileYEnd; ty++) {
+            for (uint16_t tx = tileXStart; tx <= tileXEnd; tx++) {
                 const size_t tileIndex = static_cast<size_t>(ty) * numberOfTilesX + tx;
 
                 omp_set_lock(&tileLocks[tileIndex]);
@@ -96,14 +86,14 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         }
     }
 
-    for (size_t i = 0; i < totalTiles; ++i) {
+    for (size_t i = 0; i < totalTiles; i++) {
         omp_destroy_lock(&tileLocks[i]);
     }
 
     // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
     #pragma omp parallel for collapse(2)
-    for (uint16_t ty = 0; ty < numberOfTilesY; ++ty) {
-        for (uint16_t tx = 0; tx < numberOfTilesX; ++tx) {
+    for (uint16_t ty = 0; ty < numberOfTilesY; ty++) {
+        for (uint16_t tx = 0; tx < numberOfTilesX; tx++) {
             size_t tileIndex = static_cast<size_t>(ty) * numberOfTilesX + tx;
             std::vector<const RenderItem *> localShapes = spatialIndex[tileIndex];
 
@@ -118,11 +108,11 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
             const uint16_t yEnd = std::min(static_cast<uint16_t>(yStart + TILE_SIZE), height);
             const uint16_t xEnd = std::min(static_cast<uint16_t>(xStart + TILE_SIZE), width);
 
-            for (uint16_t y = yStart; y < yEnd; ++y) {
+            for (uint16_t y = yStart; y < yEnd; y++) {
                 const float py = static_cast<float>(y) + 0.5f;
 
                 #pragma omp simd
-                for (uint16_t x = xStart; x < xEnd; ++x) {
+                for (uint16_t x = xStart; x < xEnd; x++) {
                     const float px = static_cast<float>(x) + 0.5f;
                     Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
 
@@ -148,4 +138,25 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
             }
         }
     }
+}
+
+Renderer::SpatialGridParallelRenderer::RenderItemVisitor::RenderItemVisitor(RenderItem &item) : _item(item) {
+}
+
+void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Circle &c) {
+    _item.type = RenderItem::CIRCLE;
+    _item.p1 = static_cast<float>(c.getX()); // center_x
+    _item.p2 = static_cast<float>(c.getY()); // center_y
+    const auto radius = static_cast<float>(c.getRadius());
+    _item.p3 = radius * radius; // radius_sq
+}
+
+void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Rectangle &r) {
+    _item.type = RenderItem::RECTANGLE;
+    const float halfLength = static_cast<float>(r.getLength()) / 2.0f;
+    const float halfWidth = static_cast<float>(r.getWidth()) / 2.0f;
+    _item.p1 = static_cast<float>(r.getX()) - halfLength; // xMin
+    _item.p2 = static_cast<float>(r.getY()) - halfWidth; // yMin
+    _item.p3 = static_cast<float>(r.getX()) + halfLength; // xMax
+    _item.p4 = static_cast<float>(r.getY()) + halfWidth; // yMax
 }

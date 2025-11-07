@@ -42,6 +42,10 @@ namespace Shape {
             return _radius;
         }
 
+        void accept(IShapeVisitor &visitor) const override {
+            visitor.visit(*this);
+        }
+
     private:
         uint16_t _radius;
     };

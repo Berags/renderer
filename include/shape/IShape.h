@@ -6,6 +6,8 @@
 #define RENDERER_ISHAPE_H
 #include <cstdint>
 
+#include "IShapeVisitor.h"
+
 namespace Shape {
     typedef struct alignas(16) ColourRGBA {
         // in this case we use float so that the blend function
@@ -33,6 +35,8 @@ namespace Shape {
         [[nodiscard]] ColourRGBA getColour() const {
             return _colour;
         }
+
+        virtual void accept(IShapeVisitor &visitor) const = 0;
 
         [[nodiscard]] virtual bool isInside(const float px, const float py) const = 0;
 

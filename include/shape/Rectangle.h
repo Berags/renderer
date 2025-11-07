@@ -49,6 +49,10 @@ namespace Shape {
             return _width;
         }
 
+        void accept(IShapeVisitor &visitor) const override {
+            visitor.visit(*this);
+        }
+
     private:
         uint16_t _length;
         uint16_t _width;

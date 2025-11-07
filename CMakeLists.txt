@@ -41,6 +41,7 @@ add_executable(
         include/renderer/SpatialGridParallelRenderer.h
         src/renderer/OptimizedParallelRenderer.cpp
         include/renderer/OptimizedParallelRenderer.h
+        include/shape/IShapeVisitor.h
 )
 
 # --- Include Directories ---

@@ -6,6 +6,8 @@
 #define RENDERER_SPATIALGRIDPARALLELRENDERER_H
 #include "OptimizedParallelRenderer.h"
 #include "Renderer.h"
+#include "shape/Circle.h"
+#include "shape/Rectangle.h"
 
 namespace Renderer {
     class SpatialGridParallelRenderer : public OptimizedParallelRenderer {
@@ -19,6 +21,19 @@ namespace Renderer {
             }
             return a < b;
         }
+
+    private:
+        class RenderItemVisitor : public Shape::IShapeVisitor {
+        public:
+            explicit RenderItemVisitor(RenderItem &item);
+
+            void visit(const Shape::Circle &c) override;
+
+            void visit(const Shape::Rectangle &r) override;
+
+        private:
+            RenderItem &_item;
+        };
     };
 }
 
