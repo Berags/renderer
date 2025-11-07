@@ -11,7 +11,7 @@ namespace Renderer {
     public:
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
-    private:
+    protected:
         struct RenderItem {
             uint8_t z;
 

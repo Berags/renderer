@@ -111,7 +111,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
                 continue;
             }
 
-            std::ranges::stable_sort(localShapes, compareRenderItemZ);
+            std::ranges::stable_sort(localShapes, compareZ);
 
             const uint16_t yStart = ty * TILE_SIZE;
             const uint16_t xStart = tx * TILE_SIZE;
