@@ -47,6 +47,7 @@ public:
      *
      * @throws std::out_of_range if (x, y) is outside the image bounds
      */
+    #pragma omp declare simd
     void setPixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
         if (x >= _width || y >= _height) {
             throw std::runtime_error("setPixel: Pixel coordinates out of bounds.");

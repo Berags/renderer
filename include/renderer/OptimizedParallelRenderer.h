@@ -20,6 +20,9 @@ namespace Renderer {
                 RECTANGLE
             } type;
 
+            // Unique identifier for stable sorting
+            size_t id;
+
             Shape::ColourRGBA colour;
             float p1, p2, p3, p4; // shape-specific parameters
         };
@@ -28,7 +31,7 @@ namespace Renderer {
             if (a.z != b.z) {
                 return a.z < b.z;
             }
-            return &a < &b;
+            return a.id < b.id;
         }
     };
 }

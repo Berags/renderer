@@ -19,7 +19,7 @@ namespace Renderer {
             if (a->z != b->z) {
                 return a->z < b->z;
             }
-            return a < b;
+            return a->id < b->id;
         }
 
     private:
