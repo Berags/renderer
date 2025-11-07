@@ -42,6 +42,7 @@ add_executable(
         src/renderer/OptimizedParallelRenderer.cpp
         include/renderer/OptimizedParallelRenderer.h
         include/shape/IShapeVisitor.h
+        include/experiments/Experiments.h
 )
 
 # --- Include Directories ---

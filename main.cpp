@@ -5,31 +5,28 @@
 #include "include/renderer/Renderer.h"
 #include "include/shape/Circle.h"
 #include <omp.h>
+
+#include "experiments/Experiments.h"
 #include "utils/Utils.h"
 
 int main() {
     auto renderer = Renderer::Renderer();
     renderer.setStrategy(Renderer::RenderStrategy::SPATIAL_GRID_PARALLEL);
 
-    Image image(2048, 2048, "output.png");
-    std::vector<std::unique_ptr<Shape::IShape> > shapes;
+    constexpr int imageWidth = 2048;
+    constexpr int imageHeight = 2048;
 
-    std::cout << "Creating shapes...\n";
-    Utils::createShapes(shapes, image, 5000);
+    renderer.setStrategy(Renderer::RenderStrategy::SEQUENTIAL);
+    Experiments::runBenchmark(renderer, 100, 5000, 10, imageWidth, imageHeight, "sequential_benchmark_results.csv");
 
-    std::cout << "Rendering image...\n";
-    const double startTime = omp_get_wtime();
-    renderer.render(image, shapes);
-    const double endTime = omp_get_wtime();
+    renderer.setStrategy(Renderer::RenderStrategy::SIMPLE_PARALLEL);
+    Experiments::runBenchmark(renderer, 100, 5000, 10, imageWidth, imageHeight, "simple_benchmark_results.csv");
 
-    const double renderTimeMs = (endTime - startTime) * 1000.0;
-    std::cout << "Rendering completed in: " << renderTimeMs << " ms.\n";
+    renderer.setStrategy(Renderer::RenderStrategy::OPTIMIZED_PARALLEL);
+    Experiments::runBenchmark(renderer, 100, 5000, 10, imageWidth, imageHeight, "optimized_benchmark_results.csv");
 
-    if (image.save()) {
-        std::cout << "Image saved successfully.\n";
-    } else {
-        std::cout << "Failed to save image.\n";
-    }
+    renderer.setStrategy(Renderer::RenderStrategy::SPATIAL_GRID_PARALLEL);
+    Experiments::runBenchmark(renderer, 100, 5000, 10, imageWidth, imageHeight, "spatial_grid_benchmark_results.csv");
 
     return 0;
 }
