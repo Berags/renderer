@@ -92,9 +92,9 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
     // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
     #pragma omp parallel for collapse(2)
-    for (uint16_t ty = 0; ty < numberOfTilesY; ty++) {
-        for (uint16_t tx = 0; tx < numberOfTilesX; tx++) {
-            size_t tileIndex = static_cast<size_t>(ty) * numberOfTilesX + tx;
+    for (uint16_t tileIndexY = 0; tileIndexY < numberOfTilesY; tileIndexY++) {
+        for (uint16_t tileIndexX = 0; tileIndexX < numberOfTilesX; tileIndexX++) {
+            const size_t tileIndex = static_cast<size_t>(tileIndexY) * numberOfTilesX + tileIndexX;
             std::vector<const RenderItem *> localShapes = spatialIndex[tileIndex];
 
             if (localShapes.empty()) {
@@ -103,30 +103,30 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
             std::ranges::stable_sort(localShapes, compareZ);
 
-            const uint16_t yStart = ty * TILE_SIZE;
-            const uint16_t xStart = tx * TILE_SIZE;
-            const uint16_t yEnd = std::min(static_cast<uint16_t>(yStart + TILE_SIZE), height);
-            const uint16_t xEnd = std::min(static_cast<uint16_t>(xStart + TILE_SIZE), width);
+            const uint16_t pixelStartY = tileIndexY * TILE_SIZE;
+            const uint16_t pixelStartX = tileIndexX * TILE_SIZE;
+            const uint16_t pixelEndY = std::min(static_cast<uint16_t>(pixelStartY + TILE_SIZE), height);
+            const uint16_t pixelEndX = std::min(static_cast<uint16_t>(pixelStartX + TILE_SIZE), width);
 
-            for (uint16_t y = yStart; y < yEnd; y++) {
-                const float py = static_cast<float>(y) + 0.5f;
+            for (uint16_t y = pixelStartY; y < pixelEndY; y++) {
+                const float pixelCenterY = static_cast<float>(y) + 0.5f;
 
                 #pragma omp simd
-                for (uint16_t x = xStart; x < xEnd; x++) {
-                    const float px = static_cast<float>(x) + 0.5f;
+                for (uint16_t x = pixelStartX; x < pixelEndX; x++) {
+                    const float pixelCenterX = static_cast<float>(x) + 0.5f;
                     Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
 
-                    for (const auto *itemPtr: localShapes) {
-                        const auto &item = *itemPtr;
+                    for (const auto *itemPointer: localShapes) {
+                        const auto &item = *itemPointer;
                         bool inside = false;
 
                         if (item.type == RenderItem::CIRCLE) {
-                            const float dx = item.p1 - px;
-                            const float dy = item.p2 - py;
+                            const float dx = item.p1 - pixelCenterX;
+                            const float dy = item.p2 - pixelCenterY;
                             inside = (dx * dx + dy * dy) <= item.p3;
                         } else {
-                            inside = (px >= item.p1 && px <= item.p3 &&
-                                      py >= item.p2 && py <= item.p4);
+                            inside = (pixelCenterX >= item.p1 && pixelCenterX <= item.p3 &&
+                                      pixelCenterY >= item.p2 && pixelCenterY <= item.p4);
                         }
 
                         if (inside) {
