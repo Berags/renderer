@@ -29,7 +29,7 @@ void Renderer::SimpleParallelRenderer::render(Image &image,
 
     // Parallelize the rendering process over the tiles using OpenMP.
     // The `collapse(2)` clause flattens the nested loops over tiles into a single parallel loop.
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
     for (uint16_t ty = 0; ty < num_tiles_y; ++ty) {
         for (uint16_t tx = 0; tx < num_tiles_x; ++tx) {
             // Determine the pixel boundaries for the current tile.

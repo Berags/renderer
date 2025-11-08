@@ -5,19 +5,21 @@
 #include "../../include/renderer/SequentialRenderer.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-void Renderer::SequentialRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
-    std::vector<const Shape::IShape *> sorted_shapes;
-    sorted_shapes.reserve(shapes.size());
+void Renderer::SequentialRenderer::render(Image &image,
+                                          const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+    std::vector<const Shape::IShape *> sortedShapes;
+    sortedShapes.reserve(shapes.size());
     for (const auto &ptr: shapes) {
-        sorted_shapes.push_back(ptr.get());
+        sortedShapes.push_back(ptr.get());
     }
 
     // Sort shapes by Z-index (ascending) to render from back to front
-    std::ranges::sort(sorted_shapes, std::ranges::less{}, &Shape::IShape::getZ);
+    std::ranges::sort(sortedShapes, std::ranges::less{}, &Shape::IShape::getZ);
 
     const auto width = image.getWidth();
     const auto height = image.getHeight();
@@ -31,7 +33,7 @@ void Renderer::SequentialRenderer::render(Image &image, const std::vector<std::u
             Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f}; // Start with transparent black
 
             // Iterate through shapes from back to front
-            for (const auto *shape: sorted_shapes) {
+            for (const auto *shape: sortedShapes) {
                 if (shape->isInside(px, py)) {
                     // Blend the shape's color with the current pixel color
                     processedPixelColour = Renderer::blend(processedPixelColour, shape->getColour());

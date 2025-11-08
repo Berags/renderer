@@ -29,7 +29,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         omp_init_lock(&tileLocks[i]);
     }
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
@@ -77,8 +77,10 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         const uint16_t tileYStart = pixelYMin / TILE_SIZE;
 
         // Ensure the last pixel is included in the correct tile, even at boundaries.
-        const uint16_t tileXEnd = std::min(static_cast<uint16_t>(pixelXMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesX - 1));
-        const uint16_t tileYEnd = std::min(static_cast<uint16_t>(pixelYMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesY - 1));
+        const uint16_t tileXEnd = std::min(static_cast<uint16_t>(pixelXMax / TILE_SIZE),
+                                           static_cast<uint16_t>(numberOfTilesX - 1));
+        const uint16_t tileYEnd = std::min(static_cast<uint16_t>(pixelYMax / TILE_SIZE),
+                                           static_cast<uint16_t>(numberOfTilesY - 1));
 
         // Add this shape to all tiles it overlaps.
         for (uint16_t ty = tileYStart; ty <= tileYEnd; ty++) {
@@ -97,7 +99,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     }
 
     // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
     for (uint16_t tileIndexY = 0; tileIndexY < numberOfTilesY; tileIndexY++) {
         for (uint16_t tileIndexX = 0; tileIndexX < numberOfTilesX; tileIndexX++) {
             const size_t tileIndex = static_cast<size_t>(tileIndexY) * numberOfTilesX + tileIndexX;

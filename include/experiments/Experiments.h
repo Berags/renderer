@@ -4,6 +4,7 @@
 
 #ifndef RENDERER_EXPERIMENTS_H
 #define RENDERER_EXPERIMENTS_H
+#include <assert.h>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -33,23 +34,23 @@ namespace Experiments {
         Image image(imageWidth, imageHeight, "unused.png"); // Create a single image instance for all tests
         std::map<int, std::vector<std::unique_ptr<Shape::IShape> > > shapes;
 
-
-        for (int numShapes = minShapes; numShapes <= maxShapes; numShapes += step) {
+        for (int numberOfShapes = minShapes; numberOfShapes <= maxShapes; numberOfShapes += step) {
             // check if this number of shapes was already generated
-            if (!shapes.contains(numShapes)) {
-                shapes[numShapes] = std::vector<std::unique_ptr<Shape::IShape> >();
-                Utils::createShapes(shapes[step], image, numShapes);
+            if (!shapes.contains(numberOfShapes)) {
+                shapes[numberOfShapes] = std::vector<std::unique_ptr<Shape::IShape> >();
+                Utils::createShapes(shapes[numberOfShapes], image, numberOfShapes);
             }
 
+            assert(numberOfShapes == shapes[numberOfShapes].size());
             // Start the rendering process measuring the time
             const double startTime = omp_get_wtime();
-            renderer.render(image, shapes[step]);
+            renderer.render(image, (shapes[numberOfShapes]));
             const double endTime = omp_get_wtime();
 
             const double renderTimeMs = (endTime - startTime) * 1000.0;
 
-            std::cout << "Test with " << numShapes << " shapes completed in: " << renderTimeMs << " ms.\n";
-            outputFile << numShapes << "," << renderTimeMs << "\n";
+            std::cout << "Test with " << numberOfShapes << " shapes completed in: " << renderTimeMs << " ms.\n";
+            outputFile << numberOfShapes << "," << renderTimeMs << "\n";
         }
 
         outputFile.close();
