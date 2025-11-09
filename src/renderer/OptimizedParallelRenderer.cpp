@@ -65,6 +65,7 @@ void Renderer::OptimizedParallelRenderer::render(Image &image,
                 // Pixel center is at +0.5 offset
                 const float py = static_cast<float>(y) + 0.5f;
 
+                #pragma omp simd
                 for (uint16_t x = tileXStart; x < tileXEnd; x++) {
                     const float px = static_cast<float>(x) + 0.5f;
 

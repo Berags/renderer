@@ -5,10 +5,8 @@
 #include "../../include/renderer/SequentialRenderer.h"
 
 #include <algorithm>
-#include <iostream>
 
 #include "shape/Circle.h"
-#include "shape/Rectangle.h"
 
 void Renderer::SequentialRenderer::render(Image &image,
                                           const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
