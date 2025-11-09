@@ -15,6 +15,23 @@ namespace Renderer {
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
     protected:
+        struct TileRenderDataSoA {
+            std::vector<float> circlesX;
+            std::vector<float> circlesY;
+            std::vector<float> circlesRadiusSquared;
+            std::vector<Shape::ColourRGBA> circlesColour;
+            std::vector<size_t> circlesId;
+            std::vector<uint8_t> circlesZ;
+
+            std::vector<float> rectanglesXMin;
+            std::vector<float> rectanglesYMin;
+            std::vector<float> rectanglesXMax;
+            std::vector<float> rectanglesYMax;
+            std::vector<Shape::ColourRGBA> rectanglesColour;
+            std::vector<size_t> rectanglesId;
+            std::vector<uint8_t> rectanglesZ;
+        } TileDataSoA;
+
         [[nodiscard]] static bool compareZ(const RenderItem *a, const RenderItem *b) {
             if (a->z != b->z) {
                 return a->z < b->z;
@@ -34,6 +51,8 @@ namespace Renderer {
         private:
             RenderItem &_item;
         };
+
+        static void mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours);
     };
 }
 
