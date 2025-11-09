@@ -12,23 +12,6 @@ namespace Renderer {
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
     protected:
-        struct alignas(8) TileRenderDataSoA {
-            std::vector<float> circlesX;
-            std::vector<float> circlesY;
-            std::vector<float> circlesRadiusSquared;
-            std::vector<Shape::ColourRGBA> circlesColour;
-            std::vector<size_t> circlesId;
-            std::vector<uint8_t> circlesZ;
-
-            std::vector<float> rectanglesXMin;
-            std::vector<float> rectanglesYMin;
-            std::vector<float> rectanglesXMax;
-            std::vector<float> rectanglesYMax;
-            std::vector<Shape::ColourRGBA> rectanglesColour;
-            std::vector<size_t> rectanglesId;
-            std::vector<uint8_t> rectanglesZ;
-        } tileDataSoA;
-
         struct alignas(16) RenderItem {
             uint8_t z;
 

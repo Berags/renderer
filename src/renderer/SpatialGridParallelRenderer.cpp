@@ -35,7 +35,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     }
 
     // This parallel loop populates the spatial index. Each thread processes a subset of shapes.
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
