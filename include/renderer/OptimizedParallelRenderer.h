@@ -12,7 +12,7 @@ namespace Renderer {
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
     protected:
-        struct RenderItem {
+        struct alignas(16) RenderItem {
             uint8_t z;
 
             enum ShapeType {
