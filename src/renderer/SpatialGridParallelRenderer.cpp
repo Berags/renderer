@@ -12,6 +12,47 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
+inline void Renderer::SpatialGridParallelRenderer::mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours) {
+    // Merge the sorted lists of circles and rectangles that cover the pixel.
+    size_t circleIndex = 0;
+    size_t rectanglesIndex = 0;
+    while (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
+        // Find next intersecting circle
+        while (circleIndex < circlesInsidePixelMask.size() && !circlesInsidePixelMask[circleIndex]) {
+            circleIndex++;
+        }
+        // Find next intersecting rectangle
+        while (rectanglesIndex < rectanglesInsidePixelMask.size() && !rectanglesInsidePixelMask[rectanglesIndex]) {
+            rectanglesIndex++;
+        }
+
+        if (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
+            if (std::tie(tileDataSoA.circlesZ[circleIndex], tileDataSoA.circlesId[circleIndex]) <
+                std::tie(tileDataSoA.rectanglesZ[rectanglesIndex], tileDataSoA.rectanglesId[rectanglesIndex])) {
+                shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex++]);
+            } else {
+                shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex++]);
+            }
+        }
+    }
+
+    // Add remaining intersecting circles
+    while (circleIndex < circlesInsidePixelMask.size()) {
+        if (circlesInsidePixelMask[circleIndex]) {
+            shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex]);
+        }
+        circleIndex++;
+    }
+
+    // Add remaining intersecting rectangles
+    while (rectanglesIndex < rectanglesInsidePixelMask.size()) {
+        if (rectanglesInsidePixelMask[rectanglesIndex]) {
+            shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex]);
+        }
+        rectanglesIndex++;
+    }
+}
+
 void Renderer::SpatialGridParallelRenderer::render(Image &image,
                                                    const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     const auto width = image.getWidth();
@@ -149,8 +190,8 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
             std::vector<bool> circlesInsidePixelMask(tileDataSoA.circlesX.size());
             std::vector<bool> rectanglesInsidePixelMask(tileDataSoA.rectanglesXMin.size());
-            std::vector<std::pair<std::pair<uint8_t, size_t>, Shape::ColourRGBA> > shapesInPixel;
-            shapesInPixel.reserve(localShapes.size());
+            std::vector<Shape::ColourRGBA> shapesInPixelColours;
+            shapesInPixelColours.reserve(localShapes.size());
 
             // Iterate over each pixel in the tile.
             for (uint16_t y = pixelStartY; y < pixelEndY; y++) {
@@ -158,7 +199,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
                 for (uint16_t x = pixelStartX; x < pixelEndX; x++) {
                     const float pixelCenterX = static_cast<float>(x) + 0.5f;
-                    shapesInPixel.clear();
+                    shapesInPixelColours.clear();
 
                     // Use SIMD to quickly check which circles contain the current pixel center.
                     #pragma omp simd
@@ -177,33 +218,13 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
                                                         tileDataSoA.rectanglesYMax[i]);
                     }
 
-                    for (size_t i = 0; i < circlesInsidePixelMask.size(); ++i) {
-                        if (circlesInsidePixelMask[i]) {
-                            shapesInPixel.emplace_back(
-                                std::make_pair(tileDataSoA.circlesZ[i], tileDataSoA.circlesId[i]),
-                                tileDataSoA.circlesColour[i]
-                            );
-                        }
-                    }
 
-                    for (size_t i = 0; i < rectanglesInsidePixelMask.size(); ++i) {
-                        if (rectanglesInsidePixelMask[i]) {
-                            shapesInPixel.emplace_back(
-                                std::make_pair(tileDataSoA.rectanglesZ[i], tileDataSoA.rectanglesId[i]),
-                                tileDataSoA.rectanglesColour[i]
-                            );
-                        }
-                    }
-
-                    // Sort the shapes covering the pixel by Z-index to prepare for blending.
-                    std::ranges::stable_sort(shapesInPixel, [](auto const &a, auto const &b) {
-                        return std::tie(a.first.first, a.first.second) < std::tie(b.first.first, b.first.second);
-                    });
+                    mergeColours(tileDataSoA, circlesInsidePixelMask, rectanglesInsidePixelMask, shapesInPixelColours);
 
                     // Blend the colors of all shapes covering the pixel, from back to front.
                     Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
-                    for (const auto &val: shapesInPixel | std::views::values) {
-                        processedPixelColour = Renderer::blend(processedPixelColour, val);
+                    for (const auto &colour: shapesInPixelColours) {
+                        processedPixelColour = Renderer::blend(processedPixelColour, colour);
                     }
 
                     image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
@@ -216,7 +237,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 Renderer::SpatialGridParallelRenderer::RenderItemVisitor::RenderItemVisitor(RenderItem &item) : _item(item) {
 }
 
-void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Circle &c) {
+inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Circle &c) {
     _item.type = RenderItem::CIRCLE;
     _item.p1 = static_cast<float>(c.getX()); // center_x
     _item.p2 = static_cast<float>(c.getY()); // center_y
@@ -224,7 +245,7 @@ void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape
     _item.p3 = radius * radius; // radius_sq
 }
 
-void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Rectangle &r) {
+inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Rectangle &r) {
     _item.type = RenderItem::RECTANGLE;
     const float halfLength = static_cast<float>(r.getLength()) / 2.0f;
     const float halfWidth = static_cast<float>(r.getWidth()) / 2.0f;

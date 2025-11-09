@@ -51,6 +51,8 @@ namespace Renderer {
         private:
             RenderItem &_item;
         };
+
+        static void mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours) ;
     };
 }
 
