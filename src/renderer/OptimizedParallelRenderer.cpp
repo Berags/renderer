@@ -9,7 +9,8 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+void Renderer::OptimizedParallelRenderer::render(Image &image,
+                                                 const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     // Convert polymorphic shapes to flat RenderItem structs for better cache locality and vectorization
     std::vector<RenderItem> renderList;
     renderList.reserve(shapes.size());
@@ -64,7 +65,6 @@ void Renderer::OptimizedParallelRenderer::render(Image &image, const std::vector
                 // Pixel center is at +0.5 offset
                 const float py = static_cast<float>(y) + 0.5f;
 
-                // SIMD vectorization for pixel-level parallelism within a row
                 #pragma omp simd
                 for (uint16_t x = tileXStart; x < tileXEnd; x++) {
                     const float px = static_cast<float>(x) + 0.5f;
