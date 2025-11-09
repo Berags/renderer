@@ -15,7 +15,7 @@ namespace Renderer {
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
     protected:
-        typedef struct alignas(8) TileRenderDataSoA {
+        typedef struct TileRenderDataSoA {
             std::vector<float> circlesX;
             std::vector<float> circlesY;
             std::vector<float> circlesRadiusSquared;

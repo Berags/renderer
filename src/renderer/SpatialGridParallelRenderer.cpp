@@ -12,7 +12,10 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-inline void Renderer::SpatialGridParallelRenderer::mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours) {
+inline void Renderer::SpatialGridParallelRenderer::mergeColours(TileRenderDataSoA &tileDataSoA,
+                                                                std::vector<bool> &circlesInsidePixelMask,
+                                                                std::vector<bool> &rectanglesInsidePixelMask,
+                                                                std::vector<Shape::ColourRGBA> &shapesInPixelColours) {
     // Merge the sorted lists of circles and rectangles that cover the pixel.
     size_t circleIndex = 0;
     size_t rectanglesIndex = 0;
@@ -76,7 +79,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     }
 
     // This parallel loop populates the spatial index. Each thread processes a subset of shapes.
-    #pragma omp parallel for
+#pragma omp parallel for
     for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
@@ -148,7 +151,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
     // This parallel loop processes each tile independently.
     // `collapse(2)` flattens the nested loops over tiles into a single parallelized loop.
-    #pragma omp parallel for collapse(2)
+#pragma omp parallel for collapse(2)
     for (uint16_t tileIndexY = 0; tileIndexY < numberOfTilesY; tileIndexY++) {
         for (uint16_t tileIndexX = 0; tileIndexX < numberOfTilesX; tileIndexX++) {
             const size_t tileIndex = static_cast<size_t>(tileIndexY) * numberOfTilesX + tileIndexX;
@@ -212,10 +215,10 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
                     // Use SIMD to quickly check which rectangles contain the current pixel center.
                     #pragma omp simd
                     for (size_t i = 0; i < tileDataSoA.rectanglesXMin.size(); ++i) {
-                        rectanglesInsidePixelMask[i] = (pixelCenterX >= tileDataSoA.rectanglesXMin[i] && pixelCenterX <=
-                                                        tileDataSoA.rectanglesXMax[i] &&
-                                                        pixelCenterY >= tileDataSoA.rectanglesYMin[i] && pixelCenterY <=
-                                                        tileDataSoA.rectanglesYMax[i]);
+                        rectanglesInsidePixelMask[i] = (pixelCenterX >= tileDataSoA.rectanglesXMin[i] &&
+                                                        pixelCenterX <= tileDataSoA.rectanglesXMax[i] &&
+                                                        pixelCenterY >= tileDataSoA.rectanglesYMin[i] &&
+                                                        pixelCenterY <= tileDataSoA.rectanglesYMax[i]);
                     }
 
 
