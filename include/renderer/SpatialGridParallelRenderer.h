@@ -15,7 +15,7 @@ namespace Renderer {
         void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
 
     protected:
-        typedef struct TileRenderDataSoA {
+        struct TileRenderDataSoA {
             std::vector<float> circlesX;
             std::vector<float> circlesY;
             std::vector<float> circlesRadiusSquared;
@@ -52,7 +52,7 @@ namespace Renderer {
             RenderItem &_item;
         };
 
-        static void mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours) ;
+        static void mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours);
     };
 }
 

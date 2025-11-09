@@ -12,50 +12,6 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-inline void Renderer::SpatialGridParallelRenderer::mergeColours(TileRenderDataSoA &tileDataSoA,
-                                                                std::vector<bool> &circlesInsidePixelMask,
-                                                                std::vector<bool> &rectanglesInsidePixelMask,
-                                                                std::vector<Shape::ColourRGBA> &shapesInPixelColours) {
-    // Merge the sorted lists of circles and rectangles that cover the pixel.
-    size_t circleIndex = 0;
-    size_t rectanglesIndex = 0;
-    while (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
-        // Find next intersecting circle
-        while (circleIndex < circlesInsidePixelMask.size() && !circlesInsidePixelMask[circleIndex]) {
-            circleIndex++;
-        }
-        // Find next intersecting rectangle
-        while (rectanglesIndex < rectanglesInsidePixelMask.size() && !rectanglesInsidePixelMask[rectanglesIndex]) {
-            rectanglesIndex++;
-        }
-
-        if (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
-            if (std::tie(tileDataSoA.circlesZ[circleIndex], tileDataSoA.circlesId[circleIndex]) <
-                std::tie(tileDataSoA.rectanglesZ[rectanglesIndex], tileDataSoA.rectanglesId[rectanglesIndex])) {
-                shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex++]);
-            } else {
-                shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex++]);
-            }
-        }
-    }
-
-    // Add remaining intersecting circles
-    while (circleIndex < circlesInsidePixelMask.size()) {
-        if (circlesInsidePixelMask[circleIndex]) {
-            shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex]);
-        }
-        circleIndex++;
-    }
-
-    // Add remaining intersecting rectangles
-    while (rectanglesIndex < rectanglesInsidePixelMask.size()) {
-        if (rectanglesInsidePixelMask[rectanglesIndex]) {
-            shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex]);
-        }
-        rectanglesIndex++;
-    }
-}
-
 void Renderer::SpatialGridParallelRenderer::render(Image &image,
                                                    const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     const auto width = image.getWidth();
@@ -79,7 +35,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     }
 
     // This parallel loop populates the spatial index. Each thread processes a subset of shapes.
-#pragma omp parallel for
+    #pragma omp parallel for
     for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
@@ -151,7 +107,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 
     // This parallel loop processes each tile independently.
     // `collapse(2)` flattens the nested loops over tiles into a single parallelized loop.
-#pragma omp parallel for collapse(2)
+    #pragma omp parallel for collapse(2)
     for (uint16_t tileIndexY = 0; tileIndexY < numberOfTilesY; tileIndexY++) {
         for (uint16_t tileIndexX = 0; tileIndexX < numberOfTilesX; tileIndexX++) {
             const size_t tileIndex = static_cast<size_t>(tileIndexY) * numberOfTilesX + tileIndexX;
@@ -221,7 +177,6 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
                                                         pixelCenterY <= tileDataSoA.rectanglesYMax[i]);
                     }
 
-
                     mergeColours(tileDataSoA, circlesInsidePixelMask, rectanglesInsidePixelMask, shapesInPixelColours);
 
                     // Blend the colors of all shapes covering the pixel, from back to front.
@@ -240,7 +195,7 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
 Renderer::SpatialGridParallelRenderer::RenderItemVisitor::RenderItemVisitor(RenderItem &item) : _item(item) {
 }
 
-inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Circle &c) {
+void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Circle &c) {
     _item.type = RenderItem::CIRCLE;
     _item.p1 = static_cast<float>(c.getX()); // center_x
     _item.p2 = static_cast<float>(c.getY()); // center_y
@@ -248,7 +203,7 @@ inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(cons
     _item.p3 = radius * radius; // radius_sq
 }
 
-inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Rectangle &r) {
+void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(const Shape::Rectangle &r) {
     _item.type = RenderItem::RECTANGLE;
     const float halfLength = static_cast<float>(r.getLength()) / 2.0f;
     const float halfWidth = static_cast<float>(r.getWidth()) / 2.0f;
@@ -256,4 +211,48 @@ inline void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(cons
     _item.p2 = static_cast<float>(r.getY()) - halfWidth; // yMin
     _item.p3 = static_cast<float>(r.getX()) + halfLength; // xMax
     _item.p4 = static_cast<float>(r.getY()) + halfWidth; // yMax
+}
+
+void Renderer::SpatialGridParallelRenderer::mergeColours(TileRenderDataSoA &tileDataSoA,
+                                                         std::vector<bool> &circlesInsidePixelMask,
+                                                         std::vector<bool> &rectanglesInsidePixelMask,
+                                                         std::vector<Shape::ColourRGBA> &shapesInPixelColours) {
+    // Merge the sorted lists of circles and rectangles that cover the pixel.
+    size_t circleIndex = 0;
+    size_t rectanglesIndex = 0;
+    while (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
+        // Find next intersecting circle
+        while (circleIndex < circlesInsidePixelMask.size() && !circlesInsidePixelMask[circleIndex]) {
+            circleIndex++;
+        }
+        // Find next intersecting rectangle
+        while (rectanglesIndex < rectanglesInsidePixelMask.size() && !rectanglesInsidePixelMask[rectanglesIndex]) {
+            rectanglesIndex++;
+        }
+
+        if (circleIndex < circlesInsidePixelMask.size() && rectanglesIndex < rectanglesInsidePixelMask.size()) {
+            if (std::tie(tileDataSoA.circlesZ[circleIndex], tileDataSoA.circlesId[circleIndex]) <
+                std::tie(tileDataSoA.rectanglesZ[rectanglesIndex], tileDataSoA.rectanglesId[rectanglesIndex])) {
+                shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex++]);
+            } else {
+                shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex++]);
+            }
+        }
+    }
+
+    // Add remaining intersecting circles
+    while (circleIndex < circlesInsidePixelMask.size()) {
+        if (circlesInsidePixelMask[circleIndex]) {
+            shapesInPixelColours.push_back(tileDataSoA.circlesColour[circleIndex]);
+        }
+        circleIndex++;
+    }
+
+    // Add remaining intersecting rectangles
+    while (rectanglesIndex < rectanglesInsidePixelMask.size()) {
+        if (rectanglesInsidePixelMask[rectanglesIndex]) {
+            shapesInPixelColours.push_back(tileDataSoA.rectanglesColour[rectanglesIndex]);
+        }
+        rectanglesIndex++;
+    }
 }
