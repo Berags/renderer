@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iostream>
 #include <omp.h>
+#include <ranges>
 
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
@@ -16,20 +17,25 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
     const auto width = image.getWidth();
     const auto height = image.getHeight();
 
+    // Define tile size for the spatial grid.
     constexpr uint16_t TILE_SIZE = 32;
     const uint16_t numberOfTilesX = (width + TILE_SIZE - 1) / TILE_SIZE;
     const uint16_t numberOfTilesY = (height + TILE_SIZE - 1) / TILE_SIZE;
     const size_t totalTiles = static_cast<size_t>(numberOfTilesX) * numberOfTilesY;
 
+    // A RenderItem is a flattened representation of a shape, optimized for rendering.
     std::vector<RenderItem> renderList(shapes.size());
+    // The spatial index is a grid where each cell (tile) contains a list of shapes that overlap it.
     std::vector<std::vector<const RenderItem *> > spatialIndex(totalTiles);
 
+    // Initialize one lock per tile for thread-safe access to the spatial index.
     std::vector<omp_lock_t> tileLocks(totalTiles);
     for (size_t i = 0; i < totalTiles; i++) {
         omp_init_lock(&tileLocks[i]);
     }
 
-    #pragma omp parallel for
+    // This parallel loop populates the spatial index. Each thread processes a subset of shapes.
+#pragma omp parallel for
     for (size_t i = 0; i < shapes.size(); i++) {
         const auto &shape = shapes[i];
         RenderItem &item = renderList[i];
@@ -72,15 +78,17 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
             continue;
         }
 
-        // Tile range that covers this pixel range
+        // Determine the range of tiles that the shape's bounding box overlaps.
         const uint16_t tileXStart = pixelXMin / TILE_SIZE;
         const uint16_t tileYStart = pixelYMin / TILE_SIZE;
 
         // Ensure the last pixel is included in the correct tile, even at boundaries.
-        const uint16_t tileXEnd = std::min(static_cast<uint16_t>(pixelXMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesX - 1));
-        const uint16_t tileYEnd = std::min(static_cast<uint16_t>(pixelYMax / TILE_SIZE), static_cast<uint16_t>(numberOfTilesY - 1));
+        const uint16_t tileXEnd = std::min(static_cast<uint16_t>(pixelXMax / TILE_SIZE),
+                                           static_cast<uint16_t>(numberOfTilesX - 1));
+        const uint16_t tileYEnd = std::min(static_cast<uint16_t>(pixelYMax / TILE_SIZE),
+                                           static_cast<uint16_t>(numberOfTilesY - 1));
 
-        // Add this shape to all tiles it overlaps.
+        // Add this shape to all tiles it overlaps. A lock is used for each tile to ensure thread safety.
         for (uint16_t ty = tileYStart; ty <= tileYEnd; ty++) {
             for (uint16_t tx = tileXStart; tx <= tileXEnd; tx++) {
                 const size_t tileIndex = static_cast<size_t>(ty) * numberOfTilesX + tx;
@@ -92,11 +100,13 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
         }
     }
 
+    // Clean up the locks.
     for (size_t i = 0; i < totalTiles; i++) {
         omp_destroy_lock(&tileLocks[i]);
     }
 
-    // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
+    // This parallel loop processes each tile independently.
+    // `collapse(2)` flattens the nested loops over tiles into a single parallelized loop.
     #pragma omp parallel for collapse(2)
     for (uint16_t tileIndexY = 0; tileIndexY < numberOfTilesY; tileIndexY++) {
         for (uint16_t tileIndexX = 0; tileIndexX < numberOfTilesX; tileIndexX++) {
@@ -107,37 +117,95 @@ void Renderer::SpatialGridParallelRenderer::render(Image &image,
                 continue;
             }
 
+            // Sort shapes within the tile by Z-index to handle occlusion correctly.
             std::ranges::stable_sort(localShapes, compareZ);
+
+            // Convert the list of shapes (Array of Structures) into a Structure of Arrays (SoA)
+            // for better cache performance and to enable SIMD optimizations.
+            TileRenderDataSoA tileDataSoA{};
+            for (const auto *itemPtr: localShapes) {
+                if (const auto &item = *itemPtr; item.type == RenderItem::CIRCLE) {
+                    tileDataSoA.circlesX.push_back(item.p1);
+                    tileDataSoA.circlesY.push_back(item.p2);
+                    tileDataSoA.circlesRadiusSquared.push_back(item.p3);
+                    tileDataSoA.circlesColour.push_back(item.colour);
+                    tileDataSoA.circlesId.push_back(item.id);
+                    tileDataSoA.circlesZ.push_back(item.z);
+                } else {
+                    tileDataSoA.rectanglesXMin.push_back(item.p1);
+                    tileDataSoA.rectanglesYMin.push_back(item.p2);
+                    tileDataSoA.rectanglesXMax.push_back(item.p3);
+                    tileDataSoA.rectanglesYMax.push_back(item.p4);
+                    tileDataSoA.rectanglesColour.push_back(item.colour);
+                    tileDataSoA.rectanglesId.push_back(item.id);
+                    tileDataSoA.rectanglesZ.push_back(item.z);
+                }
+            }
 
             const uint16_t pixelStartY = tileIndexY * TILE_SIZE;
             const uint16_t pixelStartX = tileIndexX * TILE_SIZE;
             const uint16_t pixelEndY = std::min(static_cast<uint16_t>(pixelStartY + TILE_SIZE), height);
             const uint16_t pixelEndX = std::min(static_cast<uint16_t>(pixelStartX + TILE_SIZE), width);
 
+            std::vector<bool> circlesInsidePixelMask(tileDataSoA.circlesX.size());
+            std::vector<bool> rectanglesInsidePixelMask(tileDataSoA.rectanglesXMin.size());
+            std::vector<std::pair<std::pair<uint8_t, size_t>, Shape::ColourRGBA> > shapesInPixel;
+            shapesInPixel.reserve(localShapes.size());
+
+            // Iterate over each pixel in the tile.
             for (uint16_t y = pixelStartY; y < pixelEndY; y++) {
                 const float pixelCenterY = static_cast<float>(y) + 0.5f;
 
                 for (uint16_t x = pixelStartX; x < pixelEndX; x++) {
                     const float pixelCenterX = static_cast<float>(x) + 0.5f;
-                    Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
+                    shapesInPixel.clear();
 
-                    for (const auto *itemPointer: localShapes) {
-                        const auto &item = *itemPointer;
-                        bool inside = false;
+                    // Use SIMD to quickly check which circles contain the current pixel center.
+                    #pragma omp simd
+                    for (size_t i = 0; i < tileDataSoA.circlesX.size(); ++i) {
+                        const float dx = tileDataSoA.circlesX[i] - pixelCenterX;
+                        const float dy = tileDataSoA.circlesY[i] - pixelCenterY;
+                        circlesInsidePixelMask[i] = (dx * dx + dy * dy) <= tileDataSoA.circlesRadiusSquared[i];
+                    }
 
-                        if (item.type == RenderItem::CIRCLE) {
-                            const float dx = item.p1 - pixelCenterX;
-                            const float dy = item.p2 - pixelCenterY;
-                            inside = (dx * dx + dy * dy) <= item.p3;
-                        } else {
-                            inside = (pixelCenterX >= item.p1 && pixelCenterX <= item.p3 &&
-                                      pixelCenterY >= item.p2 && pixelCenterY <= item.p4);
-                        }
+                    // Use SIMD to quickly check which rectangles contain the current pixel center.
+                    #pragma omp simd
+                    for (size_t i = 0; i < tileDataSoA.rectanglesXMin.size(); ++i) {
+                        rectanglesInsidePixelMask[i] = (pixelCenterX >= tileDataSoA.rectanglesXMin[i] && pixelCenterX <=
+                                                        tileDataSoA.rectanglesXMax[i] &&
+                                                        pixelCenterY >= tileDataSoA.rectanglesYMin[i] && pixelCenterY <=
+                                                        tileDataSoA.rectanglesYMax[i]);
+                    }
 
-                        if (inside) {
-                            processedPixelColour = Renderer::blend(processedPixelColour, item.colour);
+                    for (size_t i = 0; i < circlesInsidePixelMask.size(); ++i) {
+                        if (circlesInsidePixelMask[i]) {
+                            shapesInPixel.emplace_back(
+                                std::make_pair(tileDataSoA.circlesZ[i], tileDataSoA.circlesId[i]),
+                                tileDataSoA.circlesColour[i]
+                            );
                         }
                     }
+
+                    for (size_t i = 0; i < rectanglesInsidePixelMask.size(); ++i) {
+                        if (rectanglesInsidePixelMask[i]) {
+                            shapesInPixel.emplace_back(
+                                std::make_pair(tileDataSoA.rectanglesZ[i], tileDataSoA.rectanglesId[i]),
+                                tileDataSoA.rectanglesColour[i]
+                            );
+                        }
+                    }
+
+                    // Sort the shapes covering the pixel by Z-index to prepare for blending.
+                    std::ranges::stable_sort(shapesInPixel, [](auto const &a, auto const &b) {
+                        return std::tie(a.first.first, a.first.second) < std::tie(b.first.first, b.first.second);
+                    });
+
+                    // Blend the colors of all shapes covering the pixel, from back to front.
+                    Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
+                    for (const auto &val: shapesInPixel | std::views::values) {
+                        processedPixelColour = Renderer::blend(processedPixelColour, val);
+                    }
+
                     image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
                 }
             }
