@@ -5,50 +5,48 @@
 #ifndef RENDERER_CIRCLE_H
 #define RENDERER_CIRCLE_H
 
-#include "IShape.h"
 #include <memory>
 
+#include "IShape.h"
+
 namespace Shape {
-    class Circle : public IShape {
-    public:
-        class Builder {
-        public:
-            Builder() = default;
+class Circle : public IShape {
+ public:
+  class Builder {
+   public:
+    Builder() = default;
 
-            Builder &x(uint16_t x);
+    Builder &x(uint16_t x);
 
-            Builder &y(uint16_t y);
+    Builder &y(uint16_t y);
 
-            Builder &z(uint8_t z);
+    Builder &z(uint8_t z);
 
-            Builder &radius(uint16_t radius);
+    Builder &radius(uint16_t radius);
 
-            Builder &colour(const ColourRGBA &colour);
+    Builder &colour(const ColourRGBA &colour);
 
-            [[nodiscard]] std::unique_ptr<Circle> build() const;
+    [[nodiscard]] std::unique_ptr<Circle> build() const;
 
-        private:
-            uint16_t _x{0}, _y{0};
-            uint8_t _z{0};
-            uint16_t _radius{0};
-            ColourRGBA _colour{};
-        };
+   private:
+    uint16_t x_{0}, y_{0};
+    uint8_t z_{0};
+    uint16_t radius_{0};
+    ColourRGBA colour_{};
+  };
 
-        explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius, const ColourRGBA &colour);
+  explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius,
+                  const ColourRGBA &colour);
 
-        [[nodiscard]] bool isInside(const float px, const float py) const override;
+  [[nodiscard]] bool is_inside(float px, float py) const override;
 
-        [[nodiscard]] uint16_t getRadius() const {
-            return _radius;
-        }
+  [[nodiscard]] uint16_t get_radius() const { return radius_; }
 
-        void accept(IShapeVisitor &visitor) const override {
-            visitor.visit(*this);
-        }
+  void accept(IShapeVisitor &visitor) const override { visitor.visit(*this); }
 
-    private:
-        uint16_t _radius;
-    };
-} // Shape
+ private:
+  uint16_t radius_;
+};
+}  // namespace Shape
 
-#endif //RENDERER_CIRCLE_H
+#endif  // RENDERER_CIRCLE_H

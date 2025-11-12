@@ -1,33 +1,51 @@
+#include <omp.h>
+
+#include "absl/log/check.h"
+#include "absl/log/initialize.h"
+#include "absl/strings/str_format.h"
+#include "experiments/Experiments.h"
 #include "include/renderer/Renderer.h"
 
-#include "experiments/Experiments.h"
-
 int main() {
-    auto renderer = Renderer::Renderer();
+  absl::InitializeLog();
+  auto renderer = Renderer::Renderer();
 
-    constexpr int imageWidth = 2048;
-    constexpr int imageHeight = 2048;
-    constexpr int minShapes = 100;
-    constexpr int maxShapes = 2000;
-    constexpr int step = 100;
-    constexpr int numberOfIterations = 10;
+  constexpr int kNumberOfIterations = 10;
 
-    for (int i = 0; i < numberOfIterations; i++) {
-        renderer.setStrategy(Renderer::RenderStrategy::SEQUENTIAL);
-        Experiments::runBenchmark(renderer, minShapes, maxShapes, step, imageWidth, imageHeight,
-                                  "results/" + std::to_string(i) + "_sequential_benchmark_results.csv");
+  printf("%d", omp_get_max_threads());
 
-        renderer.setStrategy(Renderer::RenderStrategy::SIMPLE_PARALLEL);
-        Experiments::runBenchmark(renderer, minShapes, maxShapes, step, imageWidth, imageHeight,
-                                  "results/" + std::to_string(i) + "_simple_benchmark_results.csv");
+  for (int i = 0; i < kNumberOfIterations; i++) {
+    constexpr int kStep = 100;
+    constexpr int kMaxShapes = 5000;
+    constexpr int kMinShapes = 100;
+    constexpr int kImageHeight = 2048;
+    constexpr int kImageWidth = 2048;
 
-        renderer.setStrategy(Renderer::RenderStrategy::OPTIMIZED_PARALLEL);
-        Experiments::runBenchmark(renderer, minShapes, maxShapes, step, imageWidth, imageHeight,
-                                  "results/" + std::to_string(i) + "_optimized_benchmark_results.csv");
+    std::string console_output = absl::StrFormat("Starting run n. %d", i);
+    printf("%s\n", console_output.c_str());
 
-        renderer.setStrategy(Renderer::RenderStrategy::SPATIAL_GRID_PARALLEL);
-        Experiments::runBenchmark(renderer, minShapes, maxShapes, step, imageWidth, imageHeight,
-                                  "results/" + std::to_string(i) + "_spatial_grid_benchmark_results.csv");
-    }
-    return 0;
+    renderer.set_strategy(Renderer::RenderStrategy::kSequential);
+    Experiments::run_benchmark(
+        renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
+        "results/" + std::to_string(i) + "_sequential_benchmark_results.csv");
+
+    renderer.set_strategy(Renderer::RenderStrategy::kSimpleParallel);
+    Experiments::run_benchmark(
+        renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
+        "results/" + std::to_string(i) + "_simple_benchmark_results.csv");
+
+    renderer.set_strategy(Renderer::RenderStrategy::kOptimizedParallel);
+    Experiments::run_benchmark(
+        renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
+        "results/" + std::to_string(i) + "_optimized_benchmark_results.csv");
+
+    renderer.set_strategy(Renderer::RenderStrategy::kSpatialGridParallel);
+    Experiments::run_benchmark(
+        renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
+        "results/" + std::to_string(i) + "_spatial_grid_benchmark_results.csv");
+
+    console_output = absl::StrFormat("Run n. %d done!", i);
+    printf("%s\n", console_output.c_str());
+  }
+  return 0;
 }

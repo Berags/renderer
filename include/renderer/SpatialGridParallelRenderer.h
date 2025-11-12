@@ -10,50 +10,46 @@
 #include "shape/Rectangle.h"
 
 namespace Renderer {
-    class SpatialGridParallelRenderer : public OptimizedParallelRenderer {
-    public:
-        void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
+class SpatialGridParallelRenderer : public OptimizedParallelRenderer {
+ public:
+  void render(Image &image,
+              const std::vector<std::unique_ptr<Shape::IShape> > &shapes)
+      const override;
 
-    protected:
-        struct TileRenderDataSoA {
-            std::vector<float> circlesX;
-            std::vector<float> circlesY;
-            std::vector<float> circlesRadiusSquared;
-            std::vector<Shape::ColourRGBA> circlesColour;
-            std::vector<size_t> circlesId;
-            std::vector<uint8_t> circlesZ;
+ protected:
+  struct TileRenderDataSoA {
+    std::vector<float> circles_x;
+    std::vector<float> circles_y;
+    std::vector<float> circles_radius_squared;
+    std::vector<Shape::ColourRGBA> circles_colour;
+    std::vector<size_t> circles_id;
+    std::vector<uint8_t> circles_z;
 
-            std::vector<float> rectanglesXMin;
-            std::vector<float> rectanglesYMin;
-            std::vector<float> rectanglesXMax;
-            std::vector<float> rectanglesYMax;
-            std::vector<Shape::ColourRGBA> rectanglesColour;
-            std::vector<size_t> rectanglesId;
-            std::vector<uint8_t> rectanglesZ;
-        } TileDataSoA;
+    std::vector<float> rectangles_x_min;
+    std::vector<float> rectangles_y_min;
+    std::vector<float> rectangles_x_max;
+    std::vector<float> rectangles_y_max;
+    std::vector<Shape::ColourRGBA> rectangles_colour;
+    std::vector<size_t> rectangles_id;
+    std::vector<uint8_t> rectangles_z;
+  } TileDataSoA;
 
-        [[nodiscard]] static bool compareZ(const RenderItem *a, const RenderItem *b) {
-            if (a->z != b->z) {
-                return a->z < b->z;
-            }
-            return a->id < b->id;
-        }
+  [[nodiscard]] static bool compare_z(const RenderItem *a,
+                                      const RenderItem *b) {
+    if (a->z != b->z) {
+      return a->z < b->z;
+    }
+    return a->id < b->id;
+  }
 
-    private:
-        class RenderItemVisitor : public Shape::IShapeVisitor {
-        public:
-            explicit RenderItemVisitor(RenderItem &item);
+ private:
 
-            void visit(const Shape::Circle &c) override;
+  static void merge_colours(
+      TileRenderDataSoA &tile_data,
+      std::vector<bool> &circles_inside_pixel_mask,
+      std::vector<bool> &rectangles_inside_pixel_mask,
+      std::vector<Shape::ColourRGBA> &shapes_in_pixel_colours);
+};
+}  // namespace Renderer
 
-            void visit(const Shape::Rectangle &r) override;
-
-        private:
-            RenderItem &_item;
-        };
-
-        static void mergeColours(TileRenderDataSoA &tileDataSoA, std::vector<bool> &circlesInsidePixelMask, std::vector<bool> &rectanglesInsidePixelMask, std::vector<Shape::ColourRGBA> &shapesInPixelColours);
-    };
-}
-
-#endif //RENDERER_SPATIALGRIDPARALLELRENDERER_H
+#endif  // RENDERER_SPATIALGRIDPARALLELRENDERER_H

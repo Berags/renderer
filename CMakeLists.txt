@@ -11,6 +11,7 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_PARALLEL_LEVEL 8)
 
 # --- OpenMP Configuration ---
 find_package(OpenMP REQUIRED)
@@ -24,6 +25,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(stb)
 # This makes the headers available in ${stb_SOURCE_DIR}
+
+# --- Dependency: Abseil Logging ---
+set(ABSL_PROPAGATE_CXX_STD ON)
+FetchContent_Declare(
+        absl
+        GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
+        GIT_TAG 20250814.1
+)
+FetchContent_MakeAvailable(absl)
 
 # --- Main Executable Target ---
 add_executable(
@@ -54,7 +64,14 @@ target_include_directories(
 )
 
 # --- Link Libraries ---
-target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(
+        renderer
+        PRIVATE
+        OpenMP::OpenMP_CXX
+        absl::log
+        absl::log_initialize
+        absl::strings
+)
 
 # --- Compiler Flags ---
 # Set optimization flags.
@@ -63,6 +80,7 @@ target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
 target_compile_options(
         renderer
         PRIVATE
+        -g
         -O3
         -march=native)
 

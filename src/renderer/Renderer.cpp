@@ -4,31 +4,28 @@
 
 #include "renderer/Renderer.h"
 
-#include <iostream>
-#include <ostream>
-
+#include "renderer/OptimizedParallelRenderer.h"
 #include "renderer/SequentialRenderer.h"
 #include "renderer/SimpleParallelRenderer.h"
-#include "renderer/OptimizedParallelRenderer.h"
 #include "renderer/SpatialGridParallelRenderer.h"
 
-void Renderer::Renderer::setStrategy(const RenderStrategy strategy) {
-    switch (strategy) {
-        case SEQUENTIAL:
-            _strategy = std::make_unique<SequentialRenderer>();
-            break;
-        case SIMPLE_PARALLEL:
-            _strategy = std::make_unique<SimpleParallelRenderer>();
-            break;
-        case OPTIMIZED_PARALLEL:
-            _strategy = std::make_unique<OptimizedParallelRenderer>();
-            break;
-        case SPATIAL_GRID_PARALLEL:
-            _strategy = std::make_unique<SpatialGridParallelRenderer>();
-            break;
-        default:
-            std::cout << "Renderer: Unknown strategy type.\n";
-            _strategy = nullptr;
-            break;
-    }
+void Renderer::Renderer::set_strategy(const RenderStrategy strategy) {
+  switch (strategy) {
+    case kSequential:
+      strategy_ = std::make_unique<SequentialRenderer>();
+      break;
+    case kSimpleParallel:
+      strategy_ = std::make_unique<SimpleParallelRenderer>();
+      break;
+    case kOptimizedParallel:
+      strategy_ = std::make_unique<OptimizedParallelRenderer>();
+      break;
+    case kSpatialGridParallel:
+      strategy_ = std::make_unique<SpatialGridParallelRenderer>();
+      break;
+    default:
+      LOG(ERROR) << "Renderer: Unknown strategy type.";
+      strategy_ = nullptr;
+      break;
+  }
 }

@@ -9,92 +9,114 @@
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
 
-void Renderer::OptimizedParallelRenderer::render(Image &image,
-                                                 const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
-    // Convert polymorphic shapes to flat RenderItem structs for better cache locality and vectorization
-    std::vector<RenderItem> renderList;
-    renderList.reserve(shapes.size());
+void Renderer::OptimizedParallelRenderer::render(
+    Image &image,
+    const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
+  // Convert polymorphic shapes to flat RenderItem structs for better cache
+  // locality and vectorization
+  std::vector<RenderItem> render_list;
+  render_list.reserve(shapes.size());
 
-    // This adds a O(N) preprocessing step, but allows better performance in the inner loops
-    size_t i = 0;
-    for (const auto &shapePointer: shapes) {
-        RenderItem item{};
-        item.id = i++;
-        item.z = shapePointer->getZ();
-        item.colour = shapePointer->getColour();
+  // This adds a O(N) preprocessing step, but allows better performance in the
+  // inner loops
+  size_t i = 0;
+  for (const auto &shape : shapes) {
+    RenderItem item{};
+    item.id = i++;
+    item.z = shape->get_z();
+    item.colour = shape->get_colour();
 
-        if (const auto *c = dynamic_cast<const Shape::Circle *>(shapePointer.get())) {
-            item.type = RenderItem::CIRCLE;
-            item.p1 = static_cast<float>(c->getX());
-            item.p2 = static_cast<float>(c->getY());
-            // Store radius squared to avoid sqrt in inner loop
-            item.p3 = static_cast<float>(c->getRadius()) * static_cast<float>(c->getRadius());
-        } else if (const auto *r = dynamic_cast<const Shape::Rectangle *>(shapePointer.get())) {
-            item.type = RenderItem::RECTANGLE;
-            const float halfLength = static_cast<float>(r->getLength()) / 2.0f;
-            const float halfWidth = static_cast<float>(r->getWidth()) / 2.0f;
-            item.p1 = static_cast<float>(r->getX()) - halfLength; // x_min
-            item.p2 = static_cast<float>(r->getY()) - halfWidth; // y_min
-            item.p3 = static_cast<float>(r->getX()) + halfLength; // x_max
-            item.p4 = static_cast<float>(r->getY()) + halfWidth; // y_max
-        }
-        renderList.push_back(item);
-    }
+    RenderItemVisitor visitor(item);
+    shape->accept(visitor);
 
-    // Sort shapes by Z-axis for correct transparency/alpha blending (back-to-front)
-    std::ranges::stable_sort(renderList, compareZ);
+    render_list.push_back(item);
+  }
 
-    const auto width = image.getWidth();
-    const auto height = image.getHeight();
+  // Sort shapes by Z-axis for correct transparency/alpha blending
+  // (back-to-front)
+  std::ranges::stable_sort(render_list, compare_z);
 
-    // Tile-based rendering improves cache locality and enables parallel processing
-    constexpr uint16_t TILE_SIZE = 32;
-    const uint16_t numberOfTilesX = (width + TILE_SIZE - 1) / TILE_SIZE;
-    const uint16_t numberOfTilesY = (height + TILE_SIZE - 1) / TILE_SIZE;
+  const auto width = image.get_width();
+  const auto height = image.get_height();
 
-    // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested loops)
-    #pragma omp parallel for collapse(2)
-    for (uint16_t ty = 0; ty < numberOfTilesY; ty++) {
-        for (uint16_t tx = 0; tx < numberOfTilesX; tx++) {
-            const uint16_t tileYStart = ty * TILE_SIZE;
-            const uint16_t tileXStart = tx * TILE_SIZE;
-            const uint16_t tileYEnd = std::min(static_cast<uint16_t>(tileYStart + TILE_SIZE), height);
-            const uint16_t tileXEnd = std::min(static_cast<uint16_t>(tileXStart + TILE_SIZE), width);
+  // Tile-based rendering improves cache locality and enables parallel
+  // processing
+  constexpr uint16_t kTileSize = 32;
+  const uint16_t num_tiles_x = (width + kTileSize - 1) / kTileSize;
+  const uint16_t num_tiles_y = (height + kTileSize - 1) / kTileSize;
 
-            for (uint16_t y = tileYStart; y < tileYEnd; y++) {
-                // Pixel center is at +0.5 offset
-                const float py = static_cast<float>(y) + 0.5f;
+  // Parallelize over tiles using OpenMP (collapse(2) parallelizes both nested
+  // loops)
+  #pragma omp parallel for collapse(2)
+  for (uint16_t ty = 0; ty < num_tiles_y; ty++) {
+    for (uint16_t tx = 0; tx < num_tiles_x; tx++) {
+      const uint16_t tile_y_start = ty * kTileSize;
+      const uint16_t tile_x_start = tx * kTileSize;
+      const uint16_t tile_y_end =
+          std::min(static_cast<uint16_t>(tile_y_start + kTileSize), height);
+      const uint16_t tile_x_end =
+          std::min(static_cast<uint16_t>(tile_x_start + kTileSize), width);
 
-                #pragma omp simd
-                for (uint16_t x = tileXStart; x < tileXEnd; x++) {
-                    const float px = static_cast<float>(x) + 0.5f;
+      for (uint16_t y = tile_y_start; y < tile_y_end; y++) {
+        // Pixel center is at +0.5 offset
+        const float py = static_cast<float>(y) + 0.5f;
 
-                    // Start with transparent background
-                    Shape::ColourRGBA processedPixelColour{0.f, 0.f, 0.f, 0.f};
+        #pragma omp simd
+        for (uint16_t x = tile_x_start; x < tile_x_end; x++) {
+          const float px = static_cast<float>(x) + 0.5f;
 
-                    // Process shapes in back-to-front order for correct alpha blending
-                    for (const auto &item: renderList) {
-                        bool inside = false;
+          // Start with transparent background
+          Shape::ColourRGBA processed_pixel_colour{0.f, 0.f, 0.f, 0.f};
 
-                        if (item.type == RenderItem::CIRCLE) {
-                            // Circle containment test: distance squared <= radius squared
-                            const float dx = item.p1 - px;
-                            const float dy = item.p2 - py;
-                            inside = (dx * dx + dy * dy) <= item.p3;
-                        } else {
-                            // Rectangle containment test: point within bounding box
-                            inside = (px >= item.p1 && px <= item.p3 &&
-                                      py >= item.p2 && py <= item.p4);
-                        }
+          // Process shapes in back-to-front order for correct alpha blending
+          for (const auto &item : render_list) {
+            bool inside = false;
 
-                        if (inside) {
-                            // Alpha blend the shape color on top of the current pixel color
-                            processedPixelColour = Renderer::blend(processedPixelColour, item.colour);
-                        }
-                    }
-                    image.setPixel(x, y, Renderer::convertToRGBA8(processedPixelColour));
-                }
+            if (item.type == RenderItem::kCircle) {
+              // Circle containment test: distance squared <= radius squared
+              const float dx = item.p1 - px;
+              const float dy = item.p2 - py;
+              inside = (dx * dx + dy * dy) <= item.p3;
+            } else {
+              // Rectangle containment test: point within bounding box
+              inside = (px >= item.p1 && px <= item.p3 && py >= item.p2 &&
+                        py <= item.p4);
             }
+
+            if (inside) {
+              // Alpha blend the shape color on top of the current pixel color
+              processed_pixel_colour =
+                  Renderer::blend(processed_pixel_colour, item.colour);
+            }
+          }
+          image.set_pixel(x, y,
+                          Renderer::convert_to_rgba8(processed_pixel_colour));
         }
+      }
     }
+  }
+}
+
+Renderer::OptimizedParallelRenderer::RenderItemVisitor::RenderItemVisitor(
+    RenderItem &item)
+    : item_(item) {}
+
+void Renderer::OptimizedParallelRenderer::RenderItemVisitor::visit(
+    const Shape::Circle &c) {
+  item_.type = RenderItem::kCircle;
+  item_.p1 = static_cast<float>(c.get_x());  // center_x
+  item_.p2 = static_cast<float>(c.get_y());  // center_y
+  const auto radius = static_cast<float>(c.get_radius());
+  item_.p3 = radius * radius;  // radius_sq
+}
+
+void Renderer::OptimizedParallelRenderer::RenderItemVisitor::visit(
+    const Shape::Rectangle &r) {
+  item_.type = RenderItem::kRectangle;
+  const float half_length = static_cast<float>(r.get_length()) / 2.0f;
+  const float half_width = static_cast<float>(r.get_width()) / 2.0f;
+  item_.p1 = static_cast<float>(r.get_x()) - half_length;  // xMin
+  item_.p2 = static_cast<float>(r.get_y()) - half_width;   // yMin
+  item_.p3 = static_cast<float>(r.get_x()) + half_length;  // xMax
+  item_.p4 = static_cast<float>(r.get_y()) + half_width;   // yMax
 }

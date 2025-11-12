@@ -4,58 +4,82 @@
 
 #ifndef RENDERER_EXPERIMENTS_H
 #define RENDERER_EXPERIMENTS_H
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include <map>
 #include <omp.h>
 
+#include <cassert>
+#include <fstream>
+#include <map>
+
+#include "absl/log/check.h"
+#include "absl/log/log.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "renderer/Renderer.h"
 #include "utils/Utils.h"
 
 namespace Experiments {
-    inline void runBenchmark(const Renderer::Renderer &renderer,
-                             const int minShapes,
-                             const int maxShapes,
-                             const int step,
-                             const int imageWidth,
-                             const int imageHeight,
-                             const std::string &outputFilename) {
-        std::ofstream outputFile(outputFilename);
-        if (!outputFile.is_open()) {
-            std::cerr << "Error: Could not open output file " << outputFilename << std::endl;
-            return;
-        }
+inline void run_benchmark(const Renderer::Renderer &renderer,
+                          const int min_shapes, const int max_shapes,
+                          const int step, const int image_width,
+                          const int image_height,
+                          const std::string &output_filename) {
+  std::string csv_content;
+  FILE *output_file = fopen(output_filename.c_str(), "w");
+  if (output_file == nullptr) {
+    LOG(ERROR) << "Error: Could not open output file " << output_filename;
+    return;
+  }
 
-        // Write CSV header
-        outputFile << "Shapes,RenderTimeMs\n";
-        std::cout << "Starting benchmark. Results will be saved to " << outputFilename << std::endl;
+  // write csv header
+  absl::StrAppend(&csv_content, "Shapes,RenderTimeMs\n");
 
-        Image image(imageWidth, imageHeight, "unused.png"); // Create a single image instance for all tests
-        std::map<uint32_t, std::vector<std::unique_ptr<Shape::IShape> > > shapes;
+  LOG(INFO) << "Running benchmark from " << min_shapes << " to " << max_shapes
+            << " shapes, step " << step << ", image size " << image_width << "x"
+            << image_height << ".";
 
-        for (uint32_t numberOfShapes = minShapes; numberOfShapes <= maxShapes; numberOfShapes += step) {
-            // check if this number of shapes was already generated
-            if (!shapes.contains(numberOfShapes)) {
-                shapes[numberOfShapes] = std::vector<std::unique_ptr<Shape::IShape> >();
-                Utils::createShapes(shapes[numberOfShapes], image, numberOfShapes);
-            }
+  const std::unique_ptr<Image> image_ptr = Image::Create(
+      image_width, image_height,
+      "unused.png");  // Create a single image instance for all tests
+  if (!image_ptr) {
+    LOG(ERROR) << "Error: Could not create image with dimensions "
+               << image_width << "x" << image_height << ".";
+    fclose(output_file);
+    return;
+  }
+  Image &image = *image_ptr;
+  std::map<uint32_t, std::vector<std::unique_ptr<Shape::IShape> > > shapes;
 
-            assert(static_cast<size_t>(numberOfShapes) == shapes[numberOfShapes].size());
-            // Start the rendering process measuring the time
-            const double startTime = omp_get_wtime();
-            renderer.render(image, shapes[numberOfShapes]);
-            const double endTime = omp_get_wtime();
-
-            const double renderTimeMs = (endTime - startTime) * 1000.0;
-
-            std::cout << "Test with " << numberOfShapes << " shapes completed in: " << renderTimeMs << " ms.\n";
-            outputFile << numberOfShapes << "," << renderTimeMs << "\n";
-        }
-
-        outputFile.close();
-        std::cout << "Benchmark finished.\n";
+  for (uint32_t n = min_shapes; n <= max_shapes; n += step) {
+    // check if this number of shapes was already generated
+    if (!shapes.contains(n)) {
+      shapes[n] = std::vector<std::unique_ptr<Shape::IShape> >();
+      Utils::create_shapes(shapes[n], image, n);
     }
-}
 
-#endif //RENDERER_EXPERIMENTS_H
+    CHECK(static_cast<size_t>(n) == shapes[n].size())
+        << "Shape generation error. Expected " << n << " shapes, got "
+        << shapes[n].size();
+    // Start the rendering process measuring the time
+    const double start_time = omp_get_wtime();
+    renderer.render(image, shapes[n]);
+    const double end_time = omp_get_wtime();
+
+    const double render_time_ms = (end_time - start_time) * 1000.0;
+
+    std::string output =
+        absl::StrFormat("Rendered %d shapes in %.2f ms.", n, render_time_ms);
+    printf("%s\n", output.c_str());
+    absl::StrAppendFormat(&csv_content, "%d,%.6f\n", n, render_time_ms);
+  }
+  const int result = fprintf(output_file, "%s", csv_content.c_str());
+  fclose(output_file);
+  if (result < 0) {
+    LOG(ERROR) << "Error: Could not write output file " << output_filename;
+    return;
+  }
+
+  LOG(INFO) << "Done. Results saved to " << output_filename;
+}
+}  // namespace Experiments
+
+#endif  // RENDERER_EXPERIMENTS_H
