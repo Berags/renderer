@@ -2,7 +2,6 @@
 
 #include "absl/log/check.h"
 #include "absl/log/initialize.h"
-#include "absl/log/log.h"
 #include "absl/strings/str_format.h"
 #include "experiments/Experiments.h"
 #include "include/renderer/Renderer.h"
@@ -13,7 +12,7 @@ int main() {
 
   constexpr int kNumberOfIterations = 10;
 
-  omp_set_num_threads(40);
+  printf("%d", omp_get_max_threads());
 
   for (int i = 0; i < kNumberOfIterations; i++) {
     constexpr int kStep = 100;
@@ -24,6 +23,11 @@ int main() {
 
     std::string console_output = absl::StrFormat("Starting run n. %d", i);
     printf("%s\n", console_output.c_str());
+
+    renderer.set_strategy(Renderer::RenderStrategy::kSequential);
+    Experiments::run_benchmark(
+        renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
+        "results/" + std::to_string(i) + "_sequential_benchmark_results.csv");
 
     renderer.set_strategy(Renderer::RenderStrategy::kSimpleParallel);
     Experiments::run_benchmark(
