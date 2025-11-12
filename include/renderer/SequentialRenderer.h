@@ -8,10 +8,12 @@
 #include "Renderer.h"
 
 namespace Renderer {
-    class SequentialRenderer : public Strategy {
-    public:
-        void render(Image &image, const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const override;
-    };
-}
+class SequentialRenderer : public Strategy {
+ public:
+  void render(Image &image,
+              const std::vector<std::unique_ptr<Shape::IShape> > &shapes)
+      const override;
+};
+}  // namespace Renderer
 
-#endif //RENDERER_SEQUENTIALRENDERER_H
+#endif  // RENDERER_SEQUENTIALRENDERER_H

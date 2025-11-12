@@ -13,10 +13,10 @@
  * Used for rendering semi-transparent shapes with alpha blending.
  */
 typedef struct ColourRGBA8 {
-    uint8_t r; // Red channel (0-255)
-    uint8_t g; // Green channel (0-255)
-    uint8_t b; // Blue channel (0-255)
-    uint8_t a; // Alpha/transparency channel (0=transparent, 255=opaque)
+  uint8_t r;  // Red channel (0-255)
+  uint8_t g;  // Green channel (0-255)
+  uint8_t b;  // Blue channel (0-255)
+  uint8_t a;  // Alpha/transparency channel (0=transparent, 255=opaque)
 } ColourRGBA8;
 
 /**
@@ -27,61 +27,57 @@ typedef struct ColourRGBA8 {
  * - Save the buffer to a PNG file using stb_image_write
  */
 class Image {
-public:
-    /**
-     * Construct an image with specified dimensions and output filename.
-     *
-     * @param w Image width in pixels (must be > 0)
-     * @param h Image height in pixels (must be > 0)
-     * @param filename Output PNG filename for saving
-     * @throws std::runtime_error if dimensions are invalid
-     */
-    Image(uint16_t w, uint16_t h, std::string filename);
+ public:
+  /**
+   * Construct an image with specified dimensions and output filename.
+   *
+   * @param w Image width in pixels (must be > 0)
+   * @param h Image height in pixels (must be > 0)
+   * @param filename Output PNG filename for saving
+   * @throws std::runtime_error if dimensions are invalid
+   */
+  Image(uint16_t w, uint16_t h, std::string filename);
 
-    /**
-     * Set a pixel color at specified coordinates.
-     *
-     * @param x X coordinate (0 to width-1)
-     * @param y Y coordinate (0 to height-1)
-     * @param colour RGBA color value to set
-     *
-     * @throws std::out_of_range if (x, y) is outside the image bounds
-     */
-    void setPixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
-        if (x >= _width || y >= _height) {
-            throw std::runtime_error("setPixel: Pixel coordinates out of bounds.");
-        }
-        // Convert 2D coordinates (x, y) to 1D array index using row-major order
-        _pixelBuffer[static_cast<size_t>(y) * _width + x] = colour;
+  /**
+   * Set a pixel color at specified coordinates.
+   *
+   * @param x X coordinate (0 to width-1)
+   * @param y Y coordinate (0 to height-1)
+   * @param colour RGBA color value to set
+   *
+   * @throws std::out_of_range if (x, y) is outside the image bounds
+   */
+  void set_pixel(const uint16_t x, const uint16_t y, const ColourRGBA8 colour) {
+    if (x >= width_ || y >= height_) {
+      throw std::runtime_error("setPixel: Pixel coordinates out of bounds.");
     }
+    // Convert 2D coordinates (x, y) to 1D array index using row-major order
+    pixel_buffer_[static_cast<size_t>(y) * width_ + x] = colour;
+  }
 
-    /**
-     * Save the image buffer to a PNG file.
-     *
-     * @return true if save succeeded, false otherwise
-     * [[nodiscard]] ensures caller checks the result (important for error handling)
-     */
-    [[nodiscard]] bool save() const;
+  /**
+   * Save the image buffer to a PNG file.
+   *
+   * @return true if save succeeded, false otherwise
+   * [[nodiscard]] ensures caller checks the result (important for error
+   * handling)
+   */
+  [[nodiscard]] bool save() const;
 
-    [[nodiscard]] uint16_t getWidth() const {
-        return _width;
-    }
+  [[nodiscard]] uint16_t get_width() const { return width_; }
 
-    [[nodiscard]] uint16_t getHeight() const {
-        return _height;
-    }
+  [[nodiscard]] uint16_t get_height() const { return height_; }
 
-private:
-    constexpr static uint16_t MAX_WIDTH = 2048;
-    constexpr static uint16_t MAX_HEIGHT = 2048;
-    uint16_t _width; // Image width in pixels
-    uint16_t _height; // Image height in pixels
+ private:
+  constexpr static uint16_t kMaxWidth = 2048;
+  constexpr static uint16_t kMaxHeight = 2048;
+  uint16_t width_;   // Image width in pixels
+  uint16_t height_;  // Image height in pixels
 
-    // Flattened 1D buffer: index = y * width + x
-    std::vector<ColourRGBA8> _pixelBuffer;
+  // Flattened 1D buffer: index = y * width + x
+  std::vector<ColourRGBA8> pixel_buffer_;
 
-    std::string _filename; // Output PNG filename
+  std::string filename_;  // Output PNG filename
 };
 
-
-#endif //RENDERER_IMAGE_H
+#endif  // RENDERER_IMAGE_H

@@ -63,6 +63,7 @@ target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
 target_compile_options(
         renderer
         PRIVATE
+        -g
         -O3
         -march=native)
 
