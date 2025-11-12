@@ -37,9 +37,16 @@ inline void run_benchmark(const Renderer::Renderer &renderer,
             << " shapes, step " << step << ", image size " << image_width << "x"
             << image_height << ".";
 
-  Image image = *Image::Create(
+  const std::unique_ptr<Image> image_ptr = Image::Create(
       image_width, image_height,
       "unused.png");  // Create a single image instance for all tests
+  if (!image_ptr) {
+    LOG(ERROR) << "Error: Could not create image with dimensions "
+               << image_width << "x" << image_height << ".";
+    fclose(output_file);
+    return;
+  }
+  Image &image = *image_ptr;
   std::map<uint32_t, std::vector<std::unique_ptr<Shape::IShape> > > shapes;
 
   for (uint32_t n = min_shapes; n <= max_shapes; n += step) {
@@ -66,7 +73,7 @@ inline void run_benchmark(const Renderer::Renderer &renderer,
   }
   const int result = fprintf(output_file, "%s", csv_content.c_str());
   fclose(output_file);
-  if (!result) {
+  if (result < 0) {
     LOG(ERROR) << "Error: Could not write output file " << output_filename;
     return;
   }

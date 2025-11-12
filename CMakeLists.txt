@@ -11,6 +11,7 @@ project(
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_BUILD_PARALLEL_LEVEL 8)
 
 # --- OpenMP Configuration ---
 find_package(OpenMP REQUIRED)

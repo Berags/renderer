@@ -217,30 +217,6 @@ void Renderer::SpatialGridParallelRenderer::render(
   }
 }
 
-Renderer::SpatialGridParallelRenderer::RenderItemVisitor::RenderItemVisitor(
-    RenderItem &item)
-    : item_(item) {}
-
-void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(
-    const Shape::Circle &c) {
-  item_.type = RenderItem::kCircle;
-  item_.p1 = static_cast<float>(c.get_x());  // center_x
-  item_.p2 = static_cast<float>(c.get_y());  // center_y
-  const auto radius = static_cast<float>(c.get_radius());
-  item_.p3 = radius * radius;  // radius_sq
-}
-
-void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(
-    const Shape::Rectangle &r) {
-  item_.type = RenderItem::kRectangle;
-  const float half_length = static_cast<float>(r.get_length()) / 2.0f;
-  const float half_width = static_cast<float>(r.get_width()) / 2.0f;
-  item_.p1 = static_cast<float>(r.get_x()) - half_length;  // xMin
-  item_.p2 = static_cast<float>(r.get_y()) - half_width;   // yMin
-  item_.p3 = static_cast<float>(r.get_x()) + half_length;  // xMax
-  item_.p4 = static_cast<float>(r.get_y()) + half_width;   // yMax
-}
-
 void Renderer::SpatialGridParallelRenderer::merge_colours(
     TileRenderDataSoA &tile_data, std::vector<bool> &circles_inside_pixel_mask,
     std::vector<bool> &rectangles_inside_pixel_mask,

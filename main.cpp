@@ -1,6 +1,9 @@
+#include <omp.h>
+
 #include "absl/log/check.h"
 #include "absl/log/initialize.h"
 #include "absl/log/log.h"
+#include "absl/strings/str_format.h"
 #include "experiments/Experiments.h"
 #include "include/renderer/Renderer.h"
 
@@ -10,12 +13,7 @@ int main() {
 
   constexpr int kNumberOfIterations = 10;
 
-  omp_set_num_threads(8);
-#pragma omp parallel
-  {
-#pragma omp single
-    LOG(INFO) << "Number of threads available: " << omp_get_num_threads();
-  }
+  omp_set_num_threads(40);
 
   for (int i = 0; i < kNumberOfIterations; i++) {
     constexpr int kStep = 100;

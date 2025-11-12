@@ -89,9 +89,34 @@ void Renderer::OptimizedParallelRenderer::render(
                   Renderer::blend(processed_pixel_colour, item.colour);
             }
           }
-          image.set_pixel(x, y, Renderer::convert_to_rgba8(processed_pixel_colour));
+          image.set_pixel(x, y,
+                          Renderer::convert_to_rgba8(processed_pixel_colour));
         }
       }
     }
   }
+}
+
+Renderer::OptimizedParallelRenderer::RenderItemVisitor::RenderItemVisitor(
+    RenderItem &item)
+    : item_(item) {}
+
+void Renderer::OptimizedParallelRenderer::RenderItemVisitor::visit(
+    const Shape::Circle &c) {
+  item_.type = RenderItem::kCircle;
+  item_.p1 = static_cast<float>(c.get_x());  // center_x
+  item_.p2 = static_cast<float>(c.get_y());  // center_y
+  const auto radius = static_cast<float>(c.get_radius());
+  item_.p3 = radius * radius;  // radius_sq
+}
+
+void Renderer::OptimizedParallelRenderer::RenderItemVisitor::visit(
+    const Shape::Rectangle &r) {
+  item_.type = RenderItem::kRectangle;
+  const float half_length = static_cast<float>(r.get_length()) / 2.0f;
+  const float half_width = static_cast<float>(r.get_width()) / 2.0f;
+  item_.p1 = static_cast<float>(r.get_x()) - half_length;  // xMin
+  item_.p2 = static_cast<float>(r.get_y()) - half_width;   // yMin
+  item_.p3 = static_cast<float>(r.get_x()) + half_length;  // xMax
+  item_.p4 = static_cast<float>(r.get_y()) + half_width;   // yMax
 }
