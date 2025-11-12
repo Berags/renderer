@@ -19,17 +19,17 @@ int main() {
     constexpr int kMinShapes = 100;
     constexpr int kImageHeight = 2048;
     constexpr int kImageWidth = 2048;
-    renderer.set_strategy(Renderer::RenderStrategy::SIMPLE_PARALLEL);
+    renderer.set_strategy(Renderer::RenderStrategy::kSimpleParallel);
     Experiments::run_benchmark(
         renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
         "results/" + std::to_string(i) + "_simple_benchmark_results.csv");
 
-    renderer.set_strategy(Renderer::RenderStrategy::OPTIMIZED_PARALLEL);
+    renderer.set_strategy(Renderer::RenderStrategy::kOptimizedParallel);
     Experiments::run_benchmark(
         renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
         "results/" + std::to_string(i) + "_optimized_benchmark_results.csv");
 
-    renderer.set_strategy(Renderer::RenderStrategy::SPATIAL_GRID_PARALLEL);
+    renderer.set_strategy(Renderer::RenderStrategy::kSpatialGridParallel);
     Experiments::run_benchmark(
         renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
         "results/" + std::to_string(i) + "_spatial_grid_benchmark_results.csv");

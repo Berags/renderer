@@ -13,10 +13,10 @@
 
 namespace Renderer {
 typedef enum RenderStrategy {
-  SEQUENTIAL,
-  SIMPLE_PARALLEL,
-  OPTIMIZED_PARALLEL,
-  SPATIAL_GRID_PARALLEL
+  kSequential,
+  kSimpleParallel,
+  kOptimizedParallel,
+  kSpatialGridParallel
 } RenderStrategy;
 
 class Strategy {
