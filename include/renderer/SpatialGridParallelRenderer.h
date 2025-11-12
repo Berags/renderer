@@ -43,17 +43,6 @@ class SpatialGridParallelRenderer : public OptimizedParallelRenderer {
   }
 
  private:
-  class RenderItemVisitor : public Shape::IShapeVisitor {
-   public:
-    explicit RenderItemVisitor(RenderItem &item);
-
-    void visit(const Shape::Circle &c) override;
-
-    void visit(const Shape::Rectangle &r) override;
-
-   private:
-    RenderItem &item_;
-  };
 
   static void merge_colours(
       TileRenderDataSoA &tile_data,

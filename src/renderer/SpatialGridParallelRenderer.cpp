@@ -53,19 +53,19 @@ void Renderer::SpatialGridParallelRenderer::render(
     RenderItemVisitor visitor(item);
     shape->accept(visitor);
 
-    float xMin, yMin, xMax, yMax;
+    float x_min, y_min, x_max, y_max;
 
     if (item.type == RenderItem::CIRCLE) {
       const auto radius = std::sqrt(item.p3);
-      xMin = item.p1 - radius;
-      yMin = item.p2 - radius;
-      xMax = item.p1 + radius;
-      yMax = item.p2 + radius;
+      x_min = item.p1 - radius;
+      y_min = item.p2 - radius;
+      x_max = item.p1 + radius;
+      y_max = item.p2 + radius;
     } else {
-      xMin = item.p1;
-      yMin = item.p2;
-      xMax = item.p3;
-      yMax = item.p4;
+      x_min = item.p1;
+      y_min = item.p2;
+      x_max = item.p3;
+      y_max = item.p4;
     }
 
     // Use ceil for min index, floor for max index.
@@ -73,15 +73,15 @@ void Renderer::SpatialGridParallelRenderer::render(
     // Pixels have centers at integer + 0.5, so subtract 0.5 before ceil/floor
     // to account for the pixel center offset.
     const int32_t pixel_x_min =
-        std::max(0, static_cast<int32_t>(std::ceil(xMin - 0.5f)));
+        std::max(0, static_cast<int32_t>(std::ceil(x_min - 0.5f)));
     const int32_t pixel_y_min =
-        std::max(0, static_cast<int32_t>(std::ceil(yMin - 0.5f)));
+        std::max(0, static_cast<int32_t>(std::ceil(y_min - 0.5f)));
     const int32_t pixel_x_max =
         std::min(static_cast<int32_t>(width) - 1,
-                 static_cast<int32_t>(std::floor(xMax - 0.5f)));
+                 static_cast<int32_t>(std::floor(x_max - 0.5f)));
     const int32_t pixel_y_max =
         std::min(static_cast<int32_t>(height) - 1,
-                 static_cast<int32_t>(std::floor(yMax - 0.5f)));
+                 static_cast<int32_t>(std::floor(y_max - 0.5f)));
 
     // Continue only if the shape is actually visible
     if (pixel_x_min > pixel_x_max || pixel_y_min > pixel_y_max) {

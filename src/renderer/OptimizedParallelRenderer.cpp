@@ -20,30 +20,15 @@ void Renderer::OptimizedParallelRenderer::render(
   // This adds a O(N) preprocessing step, but allows better performance in the
   // inner loops
   size_t i = 0;
-  for (const auto &shape_pointer : shapes) {
+  for (const auto &shape : shapes) {
     RenderItem item{};
     item.id = i++;
-    item.z = shape_pointer->get_z();
-    item.colour = shape_pointer->get_colour();
+    item.z = shape->get_z();
+    item.colour = shape->get_colour();
 
-    if (const auto *c =
-            dynamic_cast<const Shape::Circle *>(shape_pointer.get())) {
-      item.type = RenderItem::CIRCLE;
-      item.p1 = static_cast<float>(c->get_x());
-      item.p2 = static_cast<float>(c->get_y());
-      // Store radius squared to avoid sqrt in inner loop
-      item.p3 = static_cast<float>(c->get_radius()) *
-                static_cast<float>(c->get_radius());
-    } else if (const auto *r =
-                   dynamic_cast<const Shape::Rectangle *>(shape_pointer.get())) {
-      item.type = RenderItem::RECTANGLE;
-      const float halfLength = static_cast<float>(r->get_length()) / 2.0f;
-      const float halfWidth = static_cast<float>(r->get_width()) / 2.0f;
-      item.p1 = static_cast<float>(r->get_x()) - halfLength;  // x_min
-      item.p2 = static_cast<float>(r->get_y()) - halfWidth;   // y_min
-      item.p3 = static_cast<float>(r->get_x()) + halfLength;  // x_max
-      item.p4 = static_cast<float>(r->get_y()) + halfWidth;   // y_max
-    }
+    RenderItemVisitor visitor(item);
+    shape->accept(visitor);
+
     render_list.push_back(item);
   }
 
