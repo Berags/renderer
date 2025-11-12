@@ -25,6 +25,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(stb)
 # This makes the headers available in ${stb_SOURCE_DIR}
 
+# --- Dependency: Abseil Logging ---
+set(ABSL_PROPAGATE_CXX_STD ON)
+FetchContent_Declare(
+        absl
+        GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
+        GIT_TAG 20240722.0
+)
+FetchContent_MakeAvailable(absl)
+
 # --- Main Executable Target ---
 add_executable(
         renderer
@@ -54,7 +63,14 @@ target_include_directories(
 )
 
 # --- Link Libraries ---
-target_link_libraries(renderer PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(
+        renderer
+        PRIVATE
+        OpenMP::OpenMP_CXX
+        absl::log
+        absl::log_initialize
+        absl::strings
+)
 
 # --- Compiler Flags ---
 # Set optimization flags.

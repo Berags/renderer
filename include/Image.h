@@ -5,6 +5,7 @@
 #ifndef RENDERER_IMAGE_H
 #define RENDERER_IMAGE_H
 #include <cstdint>
+#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -29,14 +30,15 @@ typedef struct ColourRGBA8 {
 class Image {
  public:
   /**
-   * Construct an image with specified dimensions and output filename.
+   * Create an image with specified dimensions and output filename.
    *
    * @param w Image width in pixels (must be > 0)
    * @param h Image height in pixels (must be > 0)
    * @param filename Output PNG filename for saving
    * @throws std::runtime_error if dimensions are invalid
    */
-  Image(uint16_t w, uint16_t h, std::string filename);
+  static std::unique_ptr<Image> Create(uint16_t w, uint16_t h,
+                                       std::string filename);
 
   /**
    * Set a pixel color at specified coordinates.
@@ -69,6 +71,8 @@ class Image {
   [[nodiscard]] uint16_t get_height() const { return height_; }
 
  private:
+  Image(uint16_t w, uint16_t h, std::string filename);
+
   constexpr static uint16_t kMaxWidth = 2048;
   constexpr static uint16_t kMaxHeight = 2048;
   uint16_t width_;   // Image width in pixels

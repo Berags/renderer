@@ -1,7 +1,11 @@
+#include "absl/log/check.h"
+#include "absl/log/log.h"
+#include "absl/log/initialize.h"
 #include "experiments/Experiments.h"
 #include "include/renderer/Renderer.h"
 
 int main() {
+  absl::InitializeLog();
   auto renderer = Renderer::Renderer();
 
   constexpr int kNumberOfIterations = 10;
@@ -10,7 +14,7 @@ int main() {
   #pragma omp parallel
   {
     #pragma omp single
-    printf("num_threads = %d\n", omp_get_num_threads());
+    LOG(INFO) << "Number of threads available: " << omp_get_num_threads();
   }
 
   for (int i = 0; i < kNumberOfIterations; i++) {

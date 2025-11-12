@@ -10,6 +10,7 @@
 
 #include "../Image.h"
 #include "../shape/IShape.h"
+#include "absl/log/log.h"
 
 namespace Renderer {
 typedef enum RenderStrategy {
@@ -40,7 +41,8 @@ class Renderer {
       Image &image,
       const std::vector<std::unique_ptr<Shape::IShape> > &shapes) const {
     if (!strategy_) {
-      throw std::runtime_error("Rendering strategy is not set.");
+      LOG(ERROR) << "Renderer: Rendering strategy is not set.";
+      return;
     }
 
     strategy_->render(image, shapes);
