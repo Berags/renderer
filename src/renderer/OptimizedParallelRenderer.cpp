@@ -72,7 +72,7 @@ void Renderer::OptimizedParallelRenderer::render(
           for (const auto &item : render_list) {
             bool inside = false;
 
-            if (item.type == RenderItem::CIRCLE) {
+            if (item.type == RenderItem::kCircle) {
               // Circle containment test: distance squared <= radius squared
               const float dx = item.p1 - px;
               const float dy = item.p2 - py;

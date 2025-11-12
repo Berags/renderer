@@ -38,7 +38,7 @@ class Circle : public IShape {
   explicit Circle(uint16_t x, uint16_t y, uint8_t z, uint16_t radius,
                   const ColourRGBA &colour);
 
-  [[nodiscard]] bool is_inside(const float px, const float py) const override;
+  [[nodiscard]] bool is_inside(float px, float py) const override;
 
   [[nodiscard]] uint16_t get_radius() const { return radius_; }
 

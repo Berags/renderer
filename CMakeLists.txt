@@ -30,7 +30,7 @@ set(ABSL_PROPAGATE_CXX_STD ON)
 FetchContent_Declare(
         absl
         GIT_REPOSITORY https://github.com/abseil/abseil-cpp.git
-        GIT_TAG 20240722.0
+        GIT_TAG 20250814.1
 )
 FetchContent_MakeAvailable(absl)
 

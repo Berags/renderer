@@ -30,7 +30,7 @@ class IShape {
 
   virtual void accept(IShapeVisitor &visitor) const = 0;
 
-  [[nodiscard]] virtual bool is_inside(const float px, const float py) const = 0;
+  [[nodiscard]] virtual bool is_inside(float px, float py) const = 0;
 
  protected:
   // Max supported resolution 65535x65535

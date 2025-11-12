@@ -17,7 +17,7 @@ class OptimizedParallelRenderer : public Strategy {
   struct alignas(16) RenderItem {
     uint8_t z;
 
-    enum ShapeType { CIRCLE, RECTANGLE } type;
+    enum ShapeType { kCircle, kRectangle } type;
 
     // Unique identifier for stable sorting
     size_t id;

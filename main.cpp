@@ -1,6 +1,6 @@
 #include "absl/log/check.h"
-#include "absl/log/log.h"
 #include "absl/log/initialize.h"
+#include "absl/log/log.h"
 #include "experiments/Experiments.h"
 #include "include/renderer/Renderer.h"
 
@@ -11,9 +11,9 @@ int main() {
   constexpr int kNumberOfIterations = 10;
 
   omp_set_num_threads(8);
-  #pragma omp parallel
+#pragma omp parallel
   {
-    #pragma omp single
+#pragma omp single
     LOG(INFO) << "Number of threads available: " << omp_get_num_threads();
   }
 
@@ -23,6 +23,10 @@ int main() {
     constexpr int kMinShapes = 100;
     constexpr int kImageHeight = 2048;
     constexpr int kImageWidth = 2048;
+
+    std::string console_output = absl::StrFormat("Starting run n. %d", i);
+    printf("%s\n", console_output.c_str());
+
     renderer.set_strategy(Renderer::RenderStrategy::kSimpleParallel);
     Experiments::run_benchmark(
         renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
@@ -37,6 +41,9 @@ int main() {
     Experiments::run_benchmark(
         renderer, kMinShapes, kMaxShapes, kStep, kImageWidth, kImageHeight,
         "results/" + std::to_string(i) + "_spatial_grid_benchmark_results.csv");
+
+    console_output = absl::StrFormat("Run n. %d done!", i);
+    printf("%s\n", console_output.c_str());
   }
   return 0;
 }

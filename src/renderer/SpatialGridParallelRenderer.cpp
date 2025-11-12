@@ -7,8 +7,6 @@
 #include <omp.h>
 
 #include <algorithm>
-#include <iostream>
-#include <ranges>
 
 #include "shape/Circle.h"
 #include "shape/Rectangle.h"
@@ -55,7 +53,7 @@ void Renderer::SpatialGridParallelRenderer::render(
 
     float x_min, y_min, x_max, y_max;
 
-    if (item.type == RenderItem::CIRCLE) {
+    if (item.type == RenderItem::kCircle) {
       const auto radius = std::sqrt(item.p3);
       x_min = item.p1 - radius;
       y_min = item.p2 - radius;
@@ -142,7 +140,7 @@ void Renderer::SpatialGridParallelRenderer::render(
       TileRenderDataSoA tile_data{};
       for (const auto *item_pointer : local_shapes) {
         if (const auto &[z, type, id, colour, p1, p2, p3, p4] = *item_pointer;
-            type == RenderItem::CIRCLE) {
+            type == RenderItem::kCircle) {
           tile_data.circles_x.push_back(p1);
           tile_data.circles_y.push_back(p2);
           tile_data.circles_radius_squared.push_back(p3);
@@ -225,7 +223,7 @@ Renderer::SpatialGridParallelRenderer::RenderItemVisitor::RenderItemVisitor(
 
 void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(
     const Shape::Circle &c) {
-  item_.type = RenderItem::CIRCLE;
+  item_.type = RenderItem::kCircle;
   item_.p1 = static_cast<float>(c.get_x());  // center_x
   item_.p2 = static_cast<float>(c.get_y());  // center_y
   const auto radius = static_cast<float>(c.get_radius());
@@ -234,7 +232,7 @@ void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(
 
 void Renderer::SpatialGridParallelRenderer::RenderItemVisitor::visit(
     const Shape::Rectangle &r) {
-  item_.type = RenderItem::RECTANGLE;
+  item_.type = RenderItem::kRectangle;
   const float half_length = static_cast<float>(r.get_length()) / 2.0f;
   const float half_width = static_cast<float>(r.get_width()) / 2.0f;
   item_.p1 = static_cast<float>(r.get_x()) - half_length;  // xMin

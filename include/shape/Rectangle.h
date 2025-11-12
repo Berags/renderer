@@ -39,7 +39,7 @@ class Rectangle : public IShape {
   explicit Rectangle(uint16_t x, uint16_t y, uint8_t z, uint16_t length,
                      uint16_t width, const ColourRGBA &colour);
 
-  [[nodiscard]] bool is_inside(const float px, const float py) const override;
+  [[nodiscard]] bool is_inside(float px, float py) const override;
 
   [[nodiscard]] uint16_t get_length() const { return length_; }
 
