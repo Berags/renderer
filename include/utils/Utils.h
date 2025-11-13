@@ -45,7 +45,8 @@ inline void create_shapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes,
   std::uniform_int_distribution<uint16_t> x_distribution(0, width - 1);
   std::uniform_int_distribution<uint16_t> y_distribution(0, height - 1);
   std::uniform_int_distribution<uint8_t> z_distribution(0, 255);
-  std::uniform_real_distribution colour_distribution(0.0f, 1.0f);
+  std::uniform_real_distribution colour_distribution(0.f, 1.0f);
+  std::uniform_real_distribution alpha_distribution(0.f, .9f);
   std::uniform_int_distribution type_distribution(0, 3);
 
   std::uniform_int_distribution<uint16_t> circle_radius_distribution(20, 119);
@@ -55,27 +56,31 @@ inline void create_shapes(std::vector<std::unique_ptr<Shape::IShape> > &shapes,
 
   for (uint16_t i = 0; i < n; ++i) {
     // 75% chance to create a circle
+
+    // Generate a random alpha value for transparency
+    // this ensures that shapes are not fully opaque
+    const float alpha = alpha_distribution(gen);
     if (type_distribution(gen) != 0) {
-      shapes.push_back(
-          Shape::Circle::Builder()
-              .x(x_distribution(gen))
-              .y(y_distribution(gen))
-              .z(z_distribution(gen))
-              .radius(circle_radius_distribution(gen))
-              .colour({colour_distribution(gen), colour_distribution(gen),
-                       colour_distribution(gen), colour_distribution(gen)})
-              .build());
+      shapes.push_back(Shape::Circle::Builder()
+                           .x(x_distribution(gen))
+                           .y(y_distribution(gen))
+                           .z(z_distribution(gen))
+                           .radius(circle_radius_distribution(gen))
+                           .colour({colour_distribution(gen) * alpha,
+                                    colour_distribution(gen) * alpha,
+                                    colour_distribution(gen) * alpha, alpha})
+                           .build());
     } else {
-      shapes.push_back(
-          Shape::Rectangle::Builder()
-              .x(x_distribution(gen))
-              .y(y_distribution(gen))
-              .z(z_distribution(gen))
-              .length(rectangle_length_distribution(gen))
-              .width(rectangle_width_distribution(gen))
-              .colour({colour_distribution(gen), colour_distribution(gen),
-                       colour_distribution(gen), colour_distribution(gen)})
-              .build());
+      shapes.push_back(Shape::Rectangle::Builder()
+                           .x(x_distribution(gen))
+                           .y(y_distribution(gen))
+                           .z(z_distribution(gen))
+                           .length(rectangle_length_distribution(gen))
+                           .width(rectangle_width_distribution(gen))
+                           .colour({colour_distribution(gen) * alpha,
+                                    colour_distribution(gen) * alpha,
+                                    colour_distribution(gen) * alpha, alpha})
+                           .build());
     }
   }
 }

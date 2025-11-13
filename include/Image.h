@@ -70,6 +70,8 @@ class Image {
 
   [[nodiscard]] uint16_t get_height() const { return height_; }
 
+  void set_filename(const std::string& filename) { filename_ = filename; }
+
  private:
   Image(uint16_t w, uint16_t h, std::string filename);
 
