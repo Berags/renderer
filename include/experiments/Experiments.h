@@ -70,6 +70,9 @@ inline void run_benchmark(const Renderer::Renderer &renderer,
         absl::StrFormat("Rendered %d shapes in %.2f ms.", n, render_time_ms);
     printf("%s\n", output.c_str());
     absl::StrAppendFormat(&csv_content, "%d,%.6f\n", n, render_time_ms);
+
+    image.set_filename(absl::StrFormat("imgs/output_%d.png", n));
+    const bool _ = image.save();
   }
   const int result = fprintf(output_file, "%s", csv_content.c_str());
   fclose(output_file);

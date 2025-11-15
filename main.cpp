@@ -12,7 +12,7 @@ int main() {
 
   constexpr int kNumberOfIterations = 10;
 
-  printf("%d", omp_get_max_threads());
+  printf("System's total number of threads: %d\n", omp_get_max_threads());
 
   for (int i = 0; i < kNumberOfIterations; i++) {
     constexpr int kStep = 100;

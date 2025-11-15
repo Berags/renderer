@@ -56,18 +56,29 @@ class Renderer {
     const float new_alpha = new_colour.a;
     const float inv_alpha = 1.0f - new_alpha;
 
-    return {new_colour.r * new_alpha + old_colour.r * inv_alpha,
-            new_colour.g * new_alpha + old_colour.g * inv_alpha,
-            new_colour.b * new_alpha + old_colour.b * inv_alpha,
+    return {new_colour.r + old_colour.r * inv_alpha,
+            new_colour.g + old_colour.g * inv_alpha,
+            new_colour.b + old_colour.b * inv_alpha,
             new_alpha + old_colour.a * inv_alpha};
   }
 
   [[nodiscard]] static ColourRGBA8 convert_to_rgba8(
       const Shape::ColourRGBA &float_colour) {
-    return {static_cast<std::uint8_t>(std::lround(float_colour.r * 255.0f)),
-            static_cast<std::uint8_t>(std::lround(float_colour.g * 255.0f)),
-            static_cast<std::uint8_t>(std::lround(float_colour.b * 255.0f)),
-            static_cast<std::uint8_t>(std::lround(float_colour.a * 255.0f))};
+    const auto [r, g, b, a] = unpremultiply(float_colour);
+    return {static_cast<std::uint8_t>(std::lround(r * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(g * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(b * 255.0f)),
+            static_cast<std::uint8_t>(std::lround(a * 255.0f))};
+  }
+
+  [[nodiscard]] static Shape::ColourRGBA unpremultiply(
+      const Shape::ColourRGBA &colour) {
+    if (std::fabs(colour.r) < std::numeric_limits<float>::epsilon()) {
+      return {0.f, 0.f, 0.f, 0.f};
+    }
+    const float inv_alpha = 1.0f / colour.a;
+    return {colour.r * inv_alpha, colour.g * inv_alpha, colour.b * inv_alpha,
+            colour.a};
   }
 
  private:
